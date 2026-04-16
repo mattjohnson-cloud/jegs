@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>JEGS — Scoring Signals & Priority Engine | Pivotree Internal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0f1e38;--navy-mid:#162540;--navy-surface:#1e2f4d;
+  --teal:#0f9d82;--teal-light:#e0f5f1;--teal-dim:#0a7a67;
+  --orange:#e8622a;
+  --blue:#3b82f6;--blue-dim:#1d4ed8;--blue-bg:#eff6ff;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;
+  --green:#16a34a;--green-bg:#f0fdf4;--green-border:#86efac;
+  --yellow:#d97706;--yellow-bg:#fffbeb;--yellow-border:#fcd34d;
+  --red:#dc2626;--red-bg:#fef2f2;--red-border:#fca5a5;
+  --gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-300:#cbd5e1;--gray-400:#94a3b8;--gray-500:#64748b;
+  --gray-600:#475569;--gray-700:#334155;--gray-800:#1e293b;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+  --r:8px;--r-lg:12px;--r-xl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--navy);color:#e2e8f0;font-size:14px;line-height:1.6;min-height:100vh;}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy-mid);border-bottom:1px solid rgba(255,255,255,.08);padding:0 32px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hdr-left{display:flex;align-items:center;gap:16px;}
+.hdr-logo{display:flex;align-items:center;gap:10px;}
+.hdr-div{width:1px;height:18px;background:rgba(255,255,255,.15);}
+.int-badge{background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);color:#fca5a5;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.5px;text-transform:uppercase;font-family:var(--mono);}
+.doc-title{font-size:13px;color:rgba(255,255,255,.6);font-weight:400;}
+.doc-title strong{color:rgba(255,255,255,.9);font-weight:600;}
+.hdr-right{display:flex;align-items:center;gap:12px;}
+.hdr-meta{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4);}
+.jegs-badge{background:rgba(232,98,42,.15);border:1px solid rgba(232,98,42,.3);color:#fb923c;font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;}
+
+/* ── NAV ── */
+.nav{background:var(--navy-surface);border-bottom:1px solid rgba(255,255,255,.06);padding:0 32px;display:flex;align-items:center;gap:0;position:sticky;top:58px;z-index:99;overflow-x:auto;}
+.nbtn{padding:13px 18px;font-size:12px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;font-family:var(--sans);display:flex;align-items:center;gap:6px;}
+.nbtn:hover{color:rgba(255,255,255,.85);}
+.nbtn.active{color:var(--teal);border-bottom-color:var(--teal);}
+.nbtn .tag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;font-family:var(--mono);letter-spacing:.3px;}
+.tag-open{background:rgba(220,38,38,.25);color:#fca5a5;}
+.tag-crit{background:rgba(232,98,42,.2);color:#fb923c;}
+
+/* ── MAIN ── */
+.main{padding:32px;max-width:1320px;margin:0 auto;}
+.page{display:none;}.page.active{display:block;}
+
+/* ── SECTION HEADERS ── */
+.sec-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.sec-title{font-family:var(--sans);font-weight:700;font-size:22px;color:#f1f5f9;margin-bottom:6px;}
+.sec-sub{font-size:13px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:28px;}
+
+/* ── CARDS ── */
+.card{background:var(--navy-surface);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-lg);padding:22px;}
+.card-light{background:#fff;color:var(--gray-800);border:1px solid var(--gray-200);border-radius:var(--r-lg);padding:22px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.card-title{font-family:var(--sans);font-weight:700;font-size:14px;margin-bottom:4px;}
+.card-sub{font-size:12px;opacity:.6;margin-bottom:14px;}
+.mb20{margin-bottom:20px;}.mb28{margin-bottom:28px;}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+
+/* ── SIGNAL FLOW DIAGRAM ── */
+.flow{display:flex;align-items:stretch;gap:0;margin-bottom:28px;}
+.flow-node{flex:1;background:var(--navy-surface);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);padding:20px;position:relative;}
+.flow-node:not(:last-child){border-radius:var(--r-lg) 0 0 var(--r-lg);}
+.flow-node:not(:first-child){border-left:none;}
+.flow-node:last-child{border-radius:0 var(--r-lg) var(--r-lg) 0;}
+.flow-arr{display:flex;align-items:center;flex-shrink:0;padding:0 2px;position:relative;z-index:1;}
+.flow-arr svg{display:block;}
+.fn-step{font-family:var(--mono);font-size:9px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.fn-icon{font-size:22px;margin-bottom:8px;}
+.fn-title{font-weight:700;font-size:13px;color:#f1f5f9;margin-bottom:6px;}
+.fn-desc{font-size:11px;color:rgba(255,255,255,.5);line-height:1.6;}
+.fn-src{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;margin-top:8px;}
+.src-gsc{background:#1e40af33;color:#93c5fd;border:1px solid #1e40af55;}
+.src-ga4{background:#5b21b633;color:#c4b5fd;border:1px solid #5b21b655;}
+.src-eng{background:#16a34a33;color:#86efac;border:1px solid #16a34a55;}
+.src-open{background:#dc262633;color:#fca5a5;border:1px solid #dc262655;}
+
+/* ── SCORE MODEL ── */
+.score-formula{background:var(--navy);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);padding:24px;margin-bottom:20px;position:relative;overflow:hidden;}
+.score-formula::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(15,157,130,.08),transparent 70%);}
+.formula-label{font-family:var(--mono);font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+.formula-eq{font-family:var(--mono);font-size:16px;font-weight:600;color:#f1f5f9;margin-bottom:8px;line-height:1.8;}
+.formula-eq .eq-op{color:rgba(255,255,255,.35);}
+.formula-eq .eq-s{color:#60a5fa;}
+.formula-eq .eq-f{color:#a78bfa;}
+.formula-eq .eq-b{color:#34d399;}
+.formula-eq .eq-w{color:#fbbf24;}
+.formula-note{font-size:11px;color:rgba(255,255,255,.45);font-style:italic;}
+
+/* ── DIMENSION CARDS ── */
+.dim-card{border-radius:var(--r-lg);padding:20px;border:1px solid;}
+.dim-s{background:linear-gradient(135deg,#1e3a8a18,#1e40af10);border-color:#1e40af35;}
+.dim-f{background:linear-gradient(135deg,#4c1d9518,#5b21b610);border-color:#5b21b635;}
+.dim-b{background:linear-gradient(135deg,#14532d18,#16a34a10);border-color:#16a34a35;}
+.dim-label{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+.dim-s .dim-label{color:#93c5fd;}
+.dim-f .dim-label{color:#c4b5fd;}
+.dim-b .dim-label{color:#86efac;}
+.dim-title{font-weight:700;font-size:15px;color:#f1f5f9;margin-bottom:4px;}
+.dim-gap{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:14px;}
+.sig-input{background:rgba(0,0,0,.25);border-radius:var(--r);padding:10px 14px;margin-bottom:6px;}
+.si-src{font-family:var(--mono);font-size:9px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.si-field{font-size:12px;color:#e2e8f0;font-weight:500;margin-bottom:2px;}
+.si-desc{font-size:11px;color:rgba(255,255,255,.4);line-height:1.5;}
+.si-key{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.05);padding:1px 6px;border-radius:3px;margin-top:3px;}
+
+/* ── GAP TABLE ── */
+.gap-table{width:100%;border-collapse:collapse;font-size:12px;}
+.gap-table th{text-align:left;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid rgba(255,255,255,.07);}
+.gap-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.8);}
+.gap-table tr:last-child td{border-bottom:none;}
+.gap-table tr:hover td{background:rgba(255,255,255,.02);}
+.score-chip{display:inline-flex;align-items:center;justify-content:center;width:40px;height:24px;border-radius:4px;font-family:var(--mono);font-size:11px;font-weight:700;}
+.sc-g{background:#16a34a22;color:#86efac;border:1px solid #16a34a44;}
+.sc-y{background:#d9780622;color:#fcd34d;border:1px solid #d9780644;}
+.sc-r{background:#dc262622;color:#fca5a5;border:1px solid #dc262644;}
+.gap-pill{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;}
+.gp-r{background:rgba(220,38,38,.2);color:#fca5a5;}
+.gp-y{background:rgba(217,119,6,.2);color:#fcd34d;}
+.gp-g{background:rgba(22,163,74,.2);color:#86efac;}
+
+/* ── PRIORITY ENGINE ── */
+.engine-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:24px;}
+.ef-step{background:var(--navy-surface);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-lg);padding:16px;text-align:center;position:relative;}
+.ef-step::after{content:'→';position:absolute;right:-14px;top:50%;transform:translateY(-50%);font-size:16px;color:rgba(255,255,255,.2);z-index:1;}
+.ef-step:last-child::after{display:none;}
+.ef-num{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--teal);margin-bottom:8px;}
+.ef-icon{font-size:18px;margin-bottom:6px;}
+.ef-title{font-weight:700;font-size:11px;color:#f1f5f9;margin-bottom:4px;}
+.ef-desc{font-size:10px;color:rgba(255,255,255,.4);line-height:1.5;}
+
+/* ── PRIORITY SCORE BREAKDOWN ── */
+.pse{background:var(--navy);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;}
+.pse-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.pse-name{font-weight:700;font-size:13px;color:#f1f5f9;}
+.pse-sku{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);}
+.pse-score{font-family:var(--mono);font-weight:700;font-size:20px;}
+.pse-score.sc-r{background:none;border:none;color:#fca5a5;}
+.pse-score.sc-y{background:none;border:none;color:#fcd34d;}
+.pse-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.pse-bar-label{font-size:11px;color:rgba(255,255,255,.5);width:100px;flex-shrink:0;}
+.pse-bar-track{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;}
+.pse-bar-fill{height:100%;border-radius:99px;transition:width .8s ease;}
+.pse-bar-val{font-family:var(--mono);font-size:11px;font-weight:600;min-width:28px;text-align:right;}
+.pse-reason{font-size:11px;color:rgba(255,255,255,.4);font-style:italic;margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);}
+
+/* ── COMPLETENESS SECTION ── */
+.comp-warning{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);border-radius:var(--r-lg);padding:18px 22px;margin-bottom:20px;display:flex;gap:14px;align-items:flex-start;}
+.comp-warn-txt{font-size:13px;color:rgba(255,255,255,.8);line-height:1.7;}
+.comp-warn-txt strong{color:#f87171;}
+.open-q{background:var(--navy-surface);border:1px solid rgba(255,165,0,.25);border-radius:var(--r-lg);padding:18px 22px;margin-bottom:12px;}
+.oq-num{font-family:var(--mono);font-size:10px;font-weight:700;color:#fbbf24;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.oq-q{font-weight:600;font-size:13px;color:#f1f5f9;margin-bottom:6px;}
+.oq-context{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;}
+.oq-owner{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:#fbbf24;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);padding:2px 8px;border-radius:3px;margin-top:8px;}
+
+/* ── DATA REQUIREMENTS ── */
+.data-req-card{background:var(--navy-surface);border-radius:var(--r-lg);overflow:hidden;margin-bottom:16px;}
+.drc-header{padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);}
+.drc-source{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.3px;}
+.drc-src-gsc{color:#93c5fd;}
+.drc-src-ga4{color:#c4b5fd;}
+.drc-desc{font-size:12px;color:rgba(255,255,255,.5);}
+.drc-table{width:100%;border-collapse:collapse;}
+.drc-table th{text-align:left;padding:8px 20px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.15);}
+.drc-table td{padding:10px 20px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;color:rgba(255,255,255,.75);vertical-align:top;}
+.drc-table tr:last-child td{border-bottom:none;}
+.field-name{font-family:var(--mono);font-weight:600;color:#f1f5f9;font-size:11px;margin-bottom:2px;}
+.field-how{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;}
+.use-chip{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;font-family:var(--mono);}
+.uc-s{background:#1e40af25;color:#93c5fd;}
+.uc-f{background:#5b21b625;color:#c4b5fd;}
+.uc-b{background:#16a34a25;color:#86efac;}
+.uc-p{background:#d9780625;color:#fcd34d;}
+.req-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;}
+.rb-req{background:rgba(22,163,74,.2);color:#86efac;}
+.rb-crit{background:rgba(220,38,38,.2);color:#fca5a5;}
+
+/* ── MONTHLY CYCLE ── */
+.cycle-row{display:flex;gap:0;margin-bottom:24px;}
+.cycle-step{flex:1;padding:16px 14px;position:relative;background:var(--navy-surface);border:1px solid rgba(255,255,255,.07);}
+.cycle-step:first-child{border-radius:var(--r-lg) 0 0 var(--r-lg);}
+.cycle-step:last-child{border-radius:0 var(--r-lg) var(--r-lg) 0;}
+.cycle-step:not(:first-child){border-left:none;}
+.cs-date{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px;}
+.cs-title{font-weight:700;font-size:12px;color:#f1f5f9;margin-bottom:4px;}
+.cs-desc{font-size:11px;color:rgba(255,255,255,.45);line-height:1.5;}
+.cs-owner{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);margin-top:6px;}
+
+/* ── INLINE ALERTS ── */
+.alert-open{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:var(--r);padding:12px 16px;display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+.alert-open-txt{font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;}
+.alert-open-txt strong{color:#fbbf24;}
+.alert-note{background:rgba(15,157,130,.07);border:1px solid rgba(15,157,130,.2);border-radius:var(--r);padding:12px 16px;display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+.alert-note-txt{font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;}
+.alert-note-txt strong{color:#34d399;}
+
+/* ── WORKED EXAMPLE ── */
+.sku-example{background:var(--navy);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);padding:20px;margin-bottom:16px;}
+.se-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.07);}
+.se-sku{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);margin-bottom:4px;}
+.se-name{font-weight:700;font-size:15px;color:#f1f5f9;}
+.se-brand{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px;}
+.se-priority{text-align:right;}
+.se-pri-label{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.se-pri-num{font-family:var(--mono);font-weight:700;font-size:28px;color:#fca5a5;}
+.se-signals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+.se-sig{background:rgba(0,0,0,.25);border-radius:var(--r);padding:12px;}
+.se-sig-src{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.se-sig-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:4px;}
+.se-sig-val{font-family:var(--mono);font-weight:700;font-size:16px;margin-bottom:2px;}
+.se-sig-bench{font-size:10px;color:rgba(255,255,255,.35);}
+.se-gap-good{color:#86efac;}
+.se-gap-warn{color:#fcd34d;}
+.se-gap-crit{color:#fca5a5;}
+.se-score-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06);}
+.se-score-label{font-size:11px;color:rgba(255,255,255,.5);width:120px;flex-shrink:0;}
+.se-score-bar{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;}
+.se-score-fill{height:100%;border-radius:99px;}
+.se-score-num{font-family:var(--mono);font-size:12px;font-weight:700;min-width:32px;text-align:right;}
+.se-why{font-size:12px;color:rgba(255,255,255,.5);font-style:italic;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);line-height:1.6;}
+
+/* ── TOAST ── */
+.tc{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--navy-surface);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;padding:12px 18px;border-radius:var(--r-lg);font-size:12px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tIn .25s ease;max-width:320px;}
+@keyframes tIn{from{transform:translateX(60px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.toast.out{animation:tOut .25s ease forwards;}
+@keyframes tOut{from{opacity:1;}to{opacity:0;transform:translateX(60px);}}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.03);}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:99px;}
+
+@media(max-width:900px){
+  .g3,.g2,.g4,.engine-flow{grid-template-columns:1fr;}
+  .flow{flex-direction:column;}
+  .flow-arr{display:none;}
+  .flow-node{border-left:1px solid rgba(255,255,255,.08)!important;border-radius:var(--r-lg)!important;}
+  .se-signals{grid-template-columns:1fr;}
+  .cycle-row{flex-direction:column;}
+  .cycle-step{border-left:1px solid rgba(255,255,255,.07)!important;border-radius:var(--r-lg)!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">
+      <svg height="18" viewBox="0 0 998.41333 376.33334" xmlns="http://www.w3.org/2000/svg">
+        <g transform="matrix(0.13333333,0,0,-0.13333333,0,376.33333)">
+          <path d="m 814.07,993.359 c 0,38.471 -5.851,76.611 -17.531,114.411 -11.684,37.75 -29.191,71.76 -52.551,101.98 -23.363,30.22 -52.914,54.64 -88.625,73.2 -35.738,18.52 -77.64,27.83 -125.707,27.83 -45.328,0 -85.886,-9.65 -121.601,-28.88 -35.739,-19.24 -66.293,-43.99 -91.696,-74.21 -25.445,-30.22 -44.683,-64.57 -57.707,-103.04 -13.093,-38.47 -19.593,-76.94 -19.593,-115.42 0,-38.468 6.5,-76.601 19.593,-114.359 13.024,-37.801 32.262,-71.812 57.707,-102.031 25.403,-30.219 55.957,-54.59 91.696,-73.149 35.715,-18.57 76.273,-27.82 121.601,-27.82 48.067,0 89.969,9.59 125.707,28.828 35.711,19.231 65.262,43.981 88.625,74.211 23.36,30.219 40.867,64.559 52.551,103.031 11.68,38.481 17.531,76.95 17.531,115.418 z M 236.996,1483.87 v -138.08 h 6.188 c 12.375,19.22 28.492,38.81 48.425,58.74 19.907,19.89 44.325,37.78 73.176,53.58 28.856,15.79 61.473,28.86 97.883,39.15 36.387,10.31 77.305,15.47 122.637,15.47 70.058,0 134.625,-13.41 193.722,-40.2 59.051,-26.79 109.903,-63.56 152.524,-110.26 42.57,-46.7 75.529,-101.67 98.909,-164.85 23.36,-63.22 35.04,-131.24 35.04,-204.061 0,-72.82 -11.34,-141.179 -34.01,-205.07 C 1008.83,724.391 976.52,668.75 934.645,621.352 892.719,573.961 841.895,536.16 782.125,508 722.352,479.891 654.668,465.789 579.113,465.789 c -70.058,0 -134.312,14.391 -192.691,43.27 -58.406,28.832 -103.399,68.023 -134.988,117.48 h -4.125 L 247.309,0 H 0 v 1483.87 h 236.996" style="fill:#fff;stroke:none"/>
+          <path d="m 1230.23,1483.87 h 247.31 V 494.621 h -247.31 z m -35.04,335.94 c 0,39.83 14.75,74.52 44.3,104.07 29.52,29.52 66.99,44.32 112.32,44.32 45.36,0 83.47,-14.1 114.38,-42.26 30.92,-28.18 46.39,-63.56 46.39,-106.13 0,-42.6 -15.47,-78 -46.39,-106.14 -30.91,-28.18 -69.02,-42.26 -114.38,-42.26 -45.33,0 -82.8,14.75 -112.32,44.33 -29.55,29.52 -44.3,64.2 -44.3,104.07" style="fill:#fff;stroke:none"/>
+          <path d="m 1577.73,1483.87 h 269.98 l 259.68,-721.339 h 4.12 l 261.75,721.339 h 261.73 L 2241.35,494.621 h -263.79 l -399.83,989.249" style="fill:#fff;stroke:none"/>
+          <path d="m 2898.63,993.359 c 0,-38.468 5.82,-76.937 17.5,-115.418 11.66,-38.472 29.19,-72.812 52.56,-103.031 23.36,-30.23 52.88,-54.98 88.62,-74.211 35.71,-19.238 78.31,-28.828 127.79,-28.828 49.46,0 92.03,9.59 127.77,28.828 35.71,19.231 65.24,43.981 88.62,74.211 23.34,30.219 40.87,64.559 52.55,103.031 11.66,38.481 17.54,76.95 17.54,115.418 0,38.471 -5.88,76.611 -17.54,114.411 -11.68,37.75 -29.21,71.76 -52.55,101.98 -23.38,30.22 -52.91,54.64 -88.62,73.2 -35.74,18.52 -78.31,27.83 -127.77,27.83 -49.48,0 -92.08,-9.31 -127.79,-27.83 -35.74,-18.56 -65.26,-42.98 -88.62,-73.2 -23.37,-30.22 -40.9,-64.23 -52.56,-101.98 -11.68,-37.8 -17.5,-75.94 -17.5,-114.411 z m -251.44,0 c 0,78.331 14.08,149.431 42.24,213.321 28.16,63.9 66.27,118.49 114.38,163.84 48.09,45.33 105.1,80.38 171.06,105.1 65.96,24.73 136.02,37.11 210.23,37.11 74.19,0 144.27,-12.38 210.2,-37.11 65.96,-24.72 122.95,-59.77 171.06,-105.1 48.09,-45.35 86.21,-99.94 114.39,-163.84 28.16,-63.89 42.26,-134.99 42.26,-213.321 0,-78.289 -14.1,-149.757 -42.26,-214.328 -28.18,-64.609 -66.3,-119.883 -114.39,-165.929 -48.11,-46.051 -105.1,-82.071 -171.06,-108.172 -65.93,-26.09 -136.01,-39.141 -210.2,-39.141 -74.21,0 -144.27,13.051 -210.23,39.141 -65.96,26.101 -122.97,62.121 -171.06,108.172 -48.11,46.046 -86.22,101.32 -114.38,165.929 -28.16,64.571 -42.24,136.039 -42.24,214.328" style="fill:#fff;stroke:none"/>
+          <path d="m 4241.09,2508.7 c 0,-173.34 -179.37,-313.87 -179.37,-313.87 0,0 -179.3,140.53 -179.3,313.87 0,173.31 179.3,313.84 179.3,313.84 0,0 179.37,-140.53 179.37,-313.84" style="fill:#8255b0;stroke:none"/>
+          <path d="m 3751.62,2433.23 c 150.11,-86.69 182.14,-312.27 182.14,-312.27 0,0 -211.37,-85.01 -361.48,1.64 -150.08,86.65 -182.14,312.2 -182.14,312.2 0,0 211.4,85.08 361.48,-1.57" style="fill:#f9ad16;stroke:none"/>
+          <path d="m 3572.25,1971.59 c 150.11,86.66 361.48,1.61 361.48,1.61 0,0 -32.03,-225.55 -182.14,-312.24 -150.08,-86.62 -361.45,-1.63 -361.45,-1.63 0,0 32,225.61 182.11,312.26" style="fill:#3fb33c;stroke:none"/>
+          <path d="m 4371.82,1660.94 c -150.1,86.65 -182.14,312.23 -182.14,312.23 0,0 211.37,85.05 361.47,-1.64 150.06,-86.65 182.15,-312.2 182.15,-312.2 0,0 -211.4,-85.08 -361.48,1.61" style="fill:#d7115c;stroke:none"/>
+          <path d="m 4551.15,2122.56 c -150.07,-86.68 -361.44,-1.63 -361.44,-1.63 0,0 32.01,225.58 182.14,312.23 150.08,86.63 361.45,1.64 361.45,1.64 0,0 -32,-225.61 -182.15,-312.24" style="fill:#439ada;stroke:none"/>
+        </g>
+      </svg>
+    </div>
+    <div class="hdr-div"></div>
+    <span class="int-badge">Internal</span>
+    <span class="doc-title"><strong>Scoring Signals &amp; Priority Engine</strong> — JEGS High Performance Beta</span>
+  </div>
+  <div class="hdr-right">
+    <span class="jegs-badge">JEGS Beta · Month 1</span>
+    <span class="hdr-meta" id="ld"></span>
+  </div>
+</header>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <button class="nbtn active" data-page="overview" onclick="goPage('overview',this)">Signal Architecture</button>
+  <button class="nbtn" data-page="scoring" onclick="goPage('scoring',this)">Scoring Model</button>
+  <button class="nbtn" data-page="data" onclick="goPage('data',this)">Data Requirements</button>
+  <button class="nbtn" data-page="engine" onclick="goPage('engine',this)">Priority Engine</button>
+  <button class="nbtn" data-page="completeness" onclick="goPage('completeness',this)">Completeness Scoring <span class="tag tag-open">OPEN</span></button>
+  <button class="nbtn" data-page="worked" onclick="goPage('worked',this)">Worked Examples</button>
+  <button class="nbtn" data-page="openq" onclick="goPage('openq',this)">Open Questions <span class="tag tag-crit">5 OPEN</span></button>
+</nav>
+
+<div class="main">
+
+<!-- ═══════════════ PAGE 1: SIGNAL ARCHITECTURE ═══════════════ -->
+<div id="page-overview" class="page active">
+  <div class="sec-eyebrow">Signal Architecture</div>
+  <div class="sec-title">How JEGS Data Flows Into Ascend</div>
+  <div class="sec-sub">Two live signal feeds — GSC and GA4 — cover the full customer journey from organic search through purchase. eCommerce platform and PIM integrations are out of scope for Phase 1. This page is the delivery team reference for what is connected, what it produces, and what is not yet available.</div>
+
+  <!-- Flow diagram -->
+  <div style="margin-bottom:28px">
+    <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">End-to-End Signal Flow — JEGS Phase 1</div>
+    <div class="flow">
+      <div class="flow-node">
+        <div class="fn-step">Step 01</div>
+        <div class="fn-icon">🔍</div>
+        <div class="fn-title">Customer Search</div>
+        <div class="fn-desc">Buyer searches Google for "LS7 cam", "cold air intake 5.0", "coilover kit Silverado". JEGS product pages appear (or don't) in results.</div>
+        <div><span class="fn-src src-gsc">GSC captures this</span></div>
+      </div>
+      <div class="flow-arr"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 10h12M12 6l4 4-4 4" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+      <div class="flow-node">
+        <div class="fn-step">Step 02</div>
+        <div class="fn-icon">📄</div>
+        <div class="fn-title">Product Page Land</div>
+        <div class="fn-desc">Buyer clicks through to JEGS.com product page. GA4 records the session, page views, time on page, and bounce behavior.</div>
+        <div><span class="fn-src src-ga4">GA4 captures this</span></div>
+      </div>
+      <div class="flow-arr"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 10h12M12 6l4 4-4 4" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+      <div class="flow-node">
+        <div class="fn-step">Step 03</div>
+        <div class="fn-icon">🛒</div>
+        <div class="fn-title">Purchase Funnel</div>
+        <div class="fn-desc">Buyer adds to cart, initiates checkout, or abandons. GA4 eCommerce events fire at SKU level — ATC, checkout start, purchase.</div>
+        <div><span class="fn-src src-ga4">GA4 captures this</span></div>
+      </div>
+      <div class="flow-arr"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 10h12M12 6l4 4-4 4" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+      <div class="flow-node">
+        <div class="fn-step">Step 04</div>
+        <div class="fn-icon">⚡</div>
+        <div class="fn-title">Ascend Ingests</div>
+        <div class="fn-desc">Ascend pulls GSC and GA4 via read-only API. Signals are joined at the product URL level to build a per-SKU performance profile.</div>
+        <div><span class="fn-src src-eng">Ascend platform</span></div>
+      </div>
+      <div class="flow-arr"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 10h12M12 6l4 4-4 4" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+      <div class="flow-node">
+        <div class="fn-step">Step 05</div>
+        <div class="fn-icon">🎯</div>
+        <div class="fn-title">Priority Score</div>
+        <div class="fn-desc">Three-gap model produces a Search, Find, and Buy score per SKU. Scores combined into a Priority Score that ranks the enrichment queue.</div>
+        <div><span class="fn-src src-eng">Priority Engine</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Integration status grid -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Integration Status — JEGS Phase 1</div>
+  <div class="g4 mb28">
+    <div class="card" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.06)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.2);display:inline-block"></span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:.5px">Live</span>
+      </div>
+      <div class="card-title" style="color:#f1f5f9">Google Search Console</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:4px;line-height:1.5">Property-level read access. OAuth2. Ingesting daily. Covers organic search impressions, CTR, ranking by product URL.</div>
+    </div>
+    <div class="card" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.06)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.2);display:inline-block"></span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:.5px">Live</span>
+      </div>
+      <div class="card-title" style="color:#f1f5f9">Google Analytics 4</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:4px;line-height:1.5">Viewer-level read access. OAuth2. ATC, checkout, and purchase events confirmed firing at SKU level. Joined to GSC via product URL.</div>
+    </div>
+    <div class="card" style="border-color:rgba(255,255,255,.06);opacity:.55">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--gray-500);display:inline-block"></span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px">Out of Scope</span>
+      </div>
+      <div class="card-title" style="color:rgba(255,255,255,.5)">eCommerce Platform</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;line-height:1.5">Scoped post JEGS platform launch. Will add SKU-level revenue attribution and order data. Separate SOW required.</div>
+    </div>
+    <div class="card" style="border-color:rgba(255,255,255,.06);opacity:.55">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--gray-500);display:inline-block"></span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px">Out of Scope</span>
+      </div>
+      <div class="card-title" style="color:rgba(255,255,255,.5)">PIM Direct Delivery</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;line-height:1.5">Flat file CSV delivery in use for beta. Direct PIM push is a Phase 2 add-on. Separate SOW required.</div>
+    </div>
+  </div>
+
+  <!-- GSC-GA4 join note -->
+  <div class="alert-note mb20">
+    <div style="font-size:18px;flex-shrink:0">🔗</div>
+    <div class="alert-note-txt"><strong>GSC ↔ GA4 linkage is the key.</strong> Individually, GSC tells us search visibility and GA4 tells us on-site behavior. Joined at the product URL level, we get the full funnel: how many people searched → how many clicked → how many browsed → how many bought. This is what makes the three-gap model possible. Confirm the URL-level join is validated during Week 2 integration testing.</div>
+  </div>
+
+  <!-- What each signal covers -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">What Each Signal Covers</div>
+  <div class="g2">
+    <div class="card" style="border-color:#1e40af35">
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Google Search Console — Pre-Click</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><div style="font-weight:600;font-size:12px;color:#f1f5f9;margin-bottom:2px">Organic Impressions</div><div style="font-size:11px;color:rgba(255,255,255,.45)">How many times each product page appeared in Google search results. High impressions with low CTR = title/content gap.</div></div>
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><div style="font-weight:600;font-size:12px;color:#f1f5f9;margin-bottom:2px">Click-Through Rate (CTR)</div><div style="font-size:11px;color:rgba(255,255,255,.45)">% of impressions that resulted in a click. Benchmark vs. category average to identify underperformers.</div></div>
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><div style="font-weight:600;font-size:12px;color:#f1f5f9;margin-bottom:2px">Search Query Mapping</div><div style="font-size:11px;color:rgba(255,255,255,.45)">What queries trigger each product URL. Reveals terminology gaps between how buyers search and how JEGS describes products.</div></div>
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><div style="font-weight:600;font-size:12px;color:#f1f5f9;margin-bottom:2px">Average Position</div><div style="font-size:11px;color:rgba(255,255,255,.45)">Ranking position in Google results. Position 1–3 with low CTR signals a title or meta description problem, not a ranking problem.</div></div>
+      </div>
+    </div>
+    <div class="card" style="border-color:#5b21b635">
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Google Analytics 4 — Post-Click</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><div style="font-weight:600;font-size:12px;color:#f1f5f9;margin-bottom:2px">Product Page Views + Engagement</div><div style="font-size:11px;color:rgba(255,255,255,.45)">Sessions, bounce rate, time on page per SKU. High bounce = buyer landed but couldn't evaluate the product. Missing specs, images, or fitment data.</div></div>
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><div style="font-weight:600;font-size:12px;color:#f1f5f9;margin-bottom:2px">Add-to-Cart Events (SKU-level)</div><div style="font-size:11px;color:rgba(255,255,255,.45)">eCommerce event: <code style="font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.08);padding:1px 4px;border-radius:2px">add_to_cart</code>. Requires confirmation that GA4 eCommerce tracking is firing at SKU level before Week 2 is signed off.</div></div>
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><div style="font-weight:600;font-size:12px;color:#f1f5f9;margin-bottom:2px">Checkout + Cart Abandonment</div><div style="font-size:11px;color:rgba(255,255,255,.45)">eCommerce events: <code style="font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.08);padding:1px 4px;border-radius:2px">begin_checkout</code>, <code style="font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.08);padding:1px 4px;border-radius:2px">purchase</code>. High ATC + high abandonment = trust or fitment problem at checkout.</div></div>
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><div style="font-weight:600;font-size:12px;color:#f1f5f9;margin-bottom:2px">Fitment Conflict Exits</div><div style="font-size:11px;color:rgba(255,255,255,.45)">Sessions where buyer selected a vehicle and then exited. Automotive-specific signal. Requires fitment selector event instrumentation — confirm with JEGS tech team.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 2: SCORING MODEL ═══════════════ -->
+<div id="page-scoring" class="page">
+  <div class="sec-eyebrow">Scoring Model</div>
+  <div class="sec-title">How Search, Find, and Buy Scores Are Calculated</div>
+  <div class="sec-sub">Each SKU receives three scores (0–100) derived from live signal data. Scores are equally weighted in the current model. Weights are a delivery team decision and can be adjusted as we learn from the JEGS data — document any changes here.</div>
+
+  <div class="score-formula mb28">
+    <div class="formula-label">Composite Score Formula — Current Model</div>
+    <div class="formula-eq">
+      Composite <span class="eq-op">=</span> <span class="eq-op">(</span><span class="eq-s">Search</span> <span class="eq-op">×</span> <span class="eq-w">0.33</span><span class="eq-op">)</span> <span class="eq-op">+</span> <span class="eq-op">(</span><span class="eq-f">Find</span> <span class="eq-op">×</span> <span class="eq-w">0.33</span><span class="eq-op">)</span> <span class="eq-op">+</span> <span class="eq-op">(</span><span class="eq-b">Buy</span> <span class="eq-op">×</span> <span class="eq-w">0.34</span><span class="eq-op">)</span>
+    </div>
+    <div class="formula-note">All three dimensions equally weighted — illustrative model for JEGS beta. Weights should be reviewed after Month 2 data is available and confirmed with Data Mo before use in any client-facing KPI report. The 0.34 on Buy is rounding — effectively equal thirds.</div>
+  </div>
+
+  <div class="g3 mb28">
+    <!-- SEARCH -->
+    <div class="dim-card dim-s">
+      <div class="dim-label">🔍 Search Score — GSC</div>
+      <div class="dim-title">Search Visibility</div>
+      <div class="dim-gap">Gap: high impressions, low CTR</div>
+
+      <div class="sig-input">
+        <div class="si-src">Primary input</div>
+        <div class="si-field">CTR vs. Category Benchmark</div>
+        <div class="si-desc">SKU CTR measured against the average CTR for its category. A carburetor page with 2.1% CTR vs. 4.7% category avg scores poorly here.</div>
+        <div><span class="si-key">gsc: ctr / category_avg_ctr</span></div>
+      </div>
+      <div class="sig-input">
+        <div class="si-src">Secondary input</div>
+        <div class="si-field">Impression Volume</div>
+        <div class="si-desc">Raw impression count. High-impression SKUs with low CTR get higher urgency weight in the priority engine.</div>
+        <div><span class="si-key">gsc: impressions</span></div>
+      </div>
+      <div class="sig-input">
+        <div class="si-src">Supporting input</div>
+        <div class="si-field">Average Position</div>
+        <div class="si-desc">Ranking position. Used to distinguish whether low CTR is a ranking problem (position 8+) or a content problem (position 1–3, low CTR).</div>
+        <div><span class="si-key">gsc: position</span></div>
+      </div>
+      <div style="margin-top:12px;padding:10px 12px;background:rgba(0,0,0,.2);border-radius:var(--r);font-size:11px;color:rgba(255,255,255,.5)">
+        <strong style="color:#93c5fd">Score interpretation:</strong> 75+ = performing at or above category benchmark. 50–74 = CTR gap exists, enrichment will help. &lt;50 = significant content gap — title, meta description, or structured data likely missing.
+      </div>
+    </div>
+
+    <!-- FIND -->
+    <div class="dim-card dim-f">
+      <div class="dim-label">🗂 Find Score — GA4</div>
+      <div class="dim-title">Findability / Evaluability</div>
+      <div class="dim-gap">Gap: clicks through but bounces</div>
+
+      <div class="sig-input">
+        <div class="si-src">Primary input</div>
+        <div class="si-field">Bounce Rate (inverted)</div>
+        <div class="si-desc">High bounce = buyer couldn't evaluate the product and left. Score is inverted: low bounce → high Find score. JEGS Engine avg: 72% bounce = very low Find score.</div>
+        <div><span class="si-key">ga4: bounce_rate (inverted)</span></div>
+      </div>
+      <div class="sig-input">
+        <div class="si-src">Secondary input</div>
+        <div class="si-field">Engagement Time per SKU</div>
+        <div class="si-desc">Average time buyers spend on the product page. Longer engagement correlates with richer content — specs, fitment tables, install notes present.</div>
+        <div><span class="si-key">ga4: engagement_time_msec</span></div>
+      </div>
+      <div class="sig-input">
+        <div class="si-src">Supporting input</div>
+        <div class="si-field">Fitment Filter Usage</div>
+        <div class="si-desc">% of sessions where buyer interacts with year/make/model selector. Low filter usage on a fitment-dependent part signals the selector isn't present or not working.</div>
+        <div><span class="si-key">ga4: custom_event: fitment_select</span></div>
+      </div>
+      <div style="margin-top:12px;padding:10px 12px;background:rgba(0,0,0,.2);border-radius:var(--r);font-size:11px;color:rgba(255,255,255,.5)">
+        <strong style="color:#c4b5fd">Score interpretation:</strong> 75+ = buyers are engaging and evaluating. 50–74 = moderate drop-off, attribute gaps likely. &lt;50 = buyers can't evaluate the product — missing specs, descriptions, or fitment data.
+      </div>
+    </div>
+
+    <!-- BUY -->
+    <div class="dim-card dim-b">
+      <div class="dim-label">🛒 Buy Score — GA4</div>
+      <div class="dim-title">Conversion Readiness</div>
+      <div class="dim-gap">Gap: engaged but doesn't convert</div>
+
+      <div class="sig-input">
+        <div class="si-src">Primary input</div>
+        <div class="si-field">Add-to-Cart Rate</div>
+        <div class="si-desc">% of product page sessions that result in an add-to-cart event. JEGS Engine avg: 5% ATC vs. 17% for Exhaust Systems — the gap is where the score comes from.</div>
+        <div><span class="si-key">ga4: add_to_cart / sessions</span></div>
+      </div>
+      <div class="sig-input">
+        <div class="si-src">Secondary input</div>
+        <div class="si-field">Cart-to-Checkout Rate</div>
+        <div class="si-desc">Of buyers who add to cart, how many initiate checkout? High ATC + low checkout signals a trust or specification problem discovered at cart review.</div>
+        <div><span class="si-key">ga4: begin_checkout / add_to_cart</span></div>
+      </div>
+      <div class="sig-input">
+        <div class="si-src">Supporting input</div>
+        <div class="si-field">Fitment Conflict Exits</div>
+        <div class="si-desc">Sessions where the buyer selected a vehicle, viewed a product, and then exited without adding to cart. Strong signal of missing or inaccurate fitment data — automotive-specific.</div>
+        <div><span class="si-key">ga4: fitment_conflict_exit (custom)</span></div>
+      </div>
+      <div style="margin-top:12px;padding:10px 12px;background:rgba(0,0,0,.2);border-radius:var(--r);font-size:11px;color:rgba(255,255,255,.5)">
+        <strong style="color:#86efac">Score interpretation:</strong> 75+ = strong conversion signal — SKU ready to promote. 50–74 = conversion gap, likely fitment or spec completeness. &lt;50 = catalog content actively costing revenue.
+      </div>
+    </div>
+  </div>
+
+  <!-- Score thresholds -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Score Thresholds &amp; Action Triggers</div>
+  <div class="card mb20" style="overflow-x:auto">
+    <table class="gap-table">
+      <thead><tr><th>Score Range</th><th>Label</th><th>Search Implication</th><th>Find Implication</th><th>Buy Implication</th><th>Delivery Action</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="score-chip sc-g">75–100</span></td>
+          <td style="color:#86efac;font-weight:600">Strong</td>
+          <td>CTR at or above category avg</td>
+          <td>Low bounce, good engagement</td>
+          <td>Healthy ATC rate, converting</td>
+          <td style="color:rgba(255,255,255,.5);font-size:11px">Mark as promotion-eligible. Monitor monthly.</td>
+        </tr>
+        <tr>
+          <td><span class="score-chip sc-y">50–74</span></td>
+          <td style="color:#fcd34d;font-weight:600">Needs Work</td>
+          <td>CTR gap vs. benchmark exists</td>
+          <td>Moderate bounce, some drop-off</td>
+          <td>Below-avg ATC, conversion gap</td>
+          <td style="color:rgba(255,255,255,.5);font-size:11px">Queue for enrichment. Address lowest sub-score first.</td>
+        </tr>
+        <tr>
+          <td><span class="score-chip sc-r">&lt;50</span></td>
+          <td style="color:#fca5a5;font-weight:600">Critical</td>
+          <td>Significant visibility gap</td>
+          <td>High bounce — can't be evaluated</td>
+          <td>Low ATC — active revenue leak</td>
+          <td style="color:rgba(255,255,255,.5);font-size:11px">Priority enrich. Do not promote until score ≥60.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert-open">
+    <div style="font-size:16px;flex-shrink:0">⚠️</div>
+    <div class="alert-open-txt"><strong>Weight review checkpoint — Month 2.</strong> Equal weighting (33/33/34) is the starting model. After the first full month of JEGS data is available, the delivery team should review whether Buy should be weighted higher (automotive buyers are highly purchase-intent) or whether Search deserves more weight given the fitment-driven search pattern in this category. Document any weight change and rationale before applying it.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 3: DATA REQUIREMENTS ═══════════════ -->
+<div id="page-data" class="page">
+  <div class="sec-eyebrow">Data Requirements</div>
+  <div class="sec-title">Exact Fields Needed from GSC and GA4</div>
+  <div class="sec-sub">This is the delivery team's setup checklist. Every field listed below must be confirmed live and ingesting before the prioritization engine can produce a reliable queue. Week 2 sign-off is blocked until all Required fields are confirmed.</div>
+
+  <!-- GSC -->
+  <div class="data-req-card mb20">
+    <div class="drc-header">
+      <div>
+        <div class="drc-source drc-src-gsc">Google Search Console — GSC API v3</div>
+        <div class="drc-desc">OAuth2 / property-level read-only access · ingesting daily · feeds Search Score</div>
+      </div>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:#86efac;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.3);padding:3px 8px;border-radius:3px;">LIVE</span>
+    </div>
+    <table class="drc-table">
+      <thead><tr><th>Field / Dimension</th><th>API Parameter</th><th>Used For</th><th>Confirms Firing?</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="field-name">Organic Impressions</div><div class="field-how">Pulled per product page URL, aggregated by date range</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#93c5fd">clicks, impressions</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">dimension: page</span></td>
+          <td><span class="use-chip uc-s">Search Score</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Click-Through Rate (CTR)</div><div class="field-how">Calculated: clicks ÷ impressions per URL. Benchmarked against category average.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#93c5fd">ctr</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">derived: clicks/impressions</span></td>
+          <td><span class="use-chip uc-s">Search Score</span> <span class="use-chip uc-p" style="margin-left:4px">Priority</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Average Position</div><div class="field-how">Mean ranking position in Google results for each product URL across all queries.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#93c5fd">position</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">dimension: page</span></td>
+          <td><span class="use-chip uc-s">Search Score</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Query Mapping</div><div class="field-how">The search queries that triggered each product URL. Exposes terminology gaps between buyer language and product titles.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#93c5fd">query</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">dimension: query + page</span></td>
+          <td><span class="use-chip uc-s">Search Score</span> <span class="use-chip uc-p" style="margin-left:4px">Enrichment Guidance</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">URL to SKU Mapping</div><div class="field-how">Mapping of JEGS product page URLs to internal SKU IDs. <em>This is not from GSC directly</em> — requires JEGS to provide a URL→SKU crosswalk, or it must be derived from URL patterns.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#fbbf24">JEGS-provided crosswalk</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">or URL pattern extraction</span></td>
+          <td><span class="use-chip uc-p">All Scores</span></td>
+          <td><span class="req-badge rb-crit">Confirm with JEGS</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- GA4 -->
+  <div class="data-req-card mb20">
+    <div class="drc-header">
+      <div>
+        <div class="drc-source drc-src-ga4">Google Analytics 4 — GA4 Data API</div>
+        <div class="drc-desc">OAuth2 / Viewer-level read-only · eCommerce events confirmed at SKU level · feeds Find + Buy Scores</div>
+      </div>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:#86efac;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.3);padding:3px 8px;border-radius:3px;">LIVE</span>
+    </div>
+    <table class="drc-table">
+      <thead><tr><th>Field / Event</th><th>GA4 Event / Dimension</th><th>Used For</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="field-name">Product Page Views</div><div class="field-how">Sessions and pageviews per product page URL. Joined to SKU via URL crosswalk.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#c4b5fd">sessions, screenPageViews</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">dimension: pagePath</span></td>
+          <td><span class="use-chip uc-f">Find Score</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Bounce Rate</div><div class="field-how">% of sessions with no engagement after landing. GA4 defines bounce as a session with &lt;10s engagement time and no other events.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#c4b5fd">bounceRate</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">dimension: pagePath</span></td>
+          <td><span class="use-chip uc-f">Find Score</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Engagement Time</div><div class="field-how">Average time per session on each product page. Longer = buyer is reading and evaluating. Shorter = content not sufficient to evaluate.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#c4b5fd">averageSessionDuration</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">per pagePath</span></td>
+          <td><span class="use-chip uc-f">Find Score</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Add-to-Cart Events</div><div class="field-how">eCommerce event fired when buyer adds a product to cart. <strong>Must be firing at SKU level (item_id)</strong> — not just page level. This was confirmed at SOW execution.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#c4b5fd">event: add_to_cart</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">param: item_id (SKU)</span></td>
+          <td><span class="use-chip uc-b">Buy Score</span> <span class="use-chip uc-p" style="margin-left:4px">Priority</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Checkout Initiation</div><div class="field-how">eCommerce event when buyer proceeds from cart to checkout. Used to calculate cart-to-checkout drop-off rate per SKU cohort.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#c4b5fd">event: begin_checkout</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">param: items[ ] with item_id</span></td>
+          <td><span class="use-chip uc-b">Buy Score</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Purchase Events</div><div class="field-how">eCommerce event when order completes. Used to calculate full-funnel conversion rate per SKU. Not sole-source revenue attribution — directional signal only.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#c4b5fd">event: purchase</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">param: items[ ] with item_id + revenue</span></td>
+          <td><span class="use-chip uc-b">Buy Score</span></td>
+          <td><span class="req-badge rb-req">Confirmed</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">Fitment Conflict Exit</div><div class="field-how">Custom event: buyer selected a year/make/model, viewed a product, and exited without ATC. This is an automotive-specific signal. <strong>Requires confirmation that JEGS has this event instrumented.</strong></div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#fbbf24">event: fitment_conflict_exit</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">(custom — verify with JEGS dev)</span></td>
+          <td><span class="use-chip uc-b">Buy Score</span> <span class="use-chip uc-p" style="margin-left:4px">Priority</span></td>
+          <td><span class="req-badge rb-crit">Confirm with JEGS</span></td>
+        </tr>
+        <tr>
+          <td><div class="field-name">view_item Event</div><div class="field-how">Standard eCommerce event fired on product page view with item_id. More reliable than pagePath for SKU-level attribution — use this if available.</div></td>
+          <td><code style="font-family:var(--mono);font-size:10px;color:#c4b5fd">event: view_item</code><br><span style="font-size:10px;color:rgba(255,255,255,.35)">param: item_id (SKU)</span></td>
+          <td><span class="use-chip uc-f">Find Score</span></td>
+          <td><span class="req-badge rb-crit">Confirm with JEGS</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert-open">
+    <div style="font-size:16px;flex-shrink:0">⚠️</div>
+    <div class="alert-open-txt"><strong>URL→SKU crosswalk is the critical dependency.</strong> GSC and GA4 both operate on product page URLs. Scoring at the SKU level requires mapping those URLs to JEGS internal SKU IDs. Either JEGS provides a URL→SKU spreadsheet, or we derive it from URL patterns (e.g., <code style="font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.08);padding:1px 4px;border-radius:2px">jegs.com/p/[SKU-ID]</code>). Confirm the URL structure pattern with the JEGS tech contact in Week 1. This must be resolved before Week 3 scoring can begin.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 4: PRIORITY ENGINE ═══════════════ -->
+<div id="page-engine" class="page">
+  <div class="sec-eyebrow">Priority Engine</div>
+  <div class="sec-title">How SKUs Are Ranked for the Enrichment Queue</div>
+  <div class="sec-sub">The priority engine converts Search, Find, and Buy signal gaps into a single Priority Score (0–100) per SKU. Higher score = higher revenue impact from enrichment. The queue is ordered by Priority Score, not backlog order. This is the core differentiator.</div>
+
+  <!-- Engine flow -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Priority Score Calculation — 5 Steps</div>
+  <div class="engine-flow mb28">
+    <div class="ef-step">
+      <div class="ef-num">01</div>
+      <div class="ef-icon">📥</div>
+      <div class="ef-title">Ingest Signals</div>
+      <div class="ef-desc">Pull GSC + GA4 data for all JEGS product URLs. Build per-SKU signal profile via URL crosswalk.</div>
+    </div>
+    <div class="ef-step">
+      <div class="ef-num">02</div>
+      <div class="ef-icon">📊</div>
+      <div class="ef-title">Calculate Gap</div>
+      <div class="ef-desc">For each SKU: measure actual performance vs. category benchmark across Search, Find, Buy.</div>
+    </div>
+    <div class="ef-step">
+      <div class="ef-num">03</div>
+      <div class="ef-icon">🔢</div>
+      <div class="ef-title">Score 0–100</div>
+      <div class="ef-desc">Normalize each gap to a 0–100 score. 100 = largest gap (most urgent). 0 = no gap (no need to enrich).</div>
+    </div>
+    <div class="ef-step">
+      <div class="ef-num">04</div>
+      <div class="ef-icon">⚖️</div>
+      <div class="ef-title">Weight &amp; Combine</div>
+      <div class="ef-desc">Apply equal weights (33/33/34) to produce Composite Priority Score. High commercial volume amplifies score.</div>
+    </div>
+    <div class="ef-step">
+      <div class="ef-num">05</div>
+      <div class="ef-icon">📋</div>
+      <div class="ef-title">Rank Queue</div>
+      <div class="ef-desc">Sort all JEGS SKUs by Priority Score descending. Top 500 enter the monthly batch. Queue resets each cycle.</div>
+    </div>
+  </div>
+
+  <!-- Priority score examples -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">Priority Score Breakdown — Example SKUs</div>
+  <div class="g2 mb28">
+    <div>
+      <div class="pse">
+        <div class="pse-header">
+          <div><div class="pse-name">Edelbrock 650 CFM Carburetor</div><div class="pse-sku">EDB-1406 · Engine &amp; Drivetrain · Carburetors</div></div>
+          <div style="text-align:right"><div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);margin-bottom:4px">PRIORITY SCORE</div><div class="pse-score sc-r">94</div></div>
+        </div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#93c5fd">🔍 Search (33%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:31%;background:#3b82f6"></div></div><span class="pse-bar-val" style="color:#93c5fd">31</span></div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#c4b5fd">🗂 Find (33%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:28%;background:#7c3aed"></div></div><span class="pse-bar-val" style="color:#c4b5fd">28</span></div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#86efac">🛒 Buy (34%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:33%;background:#16a34a"></div></div><span class="pse-bar-val" style="color:#86efac">33</span></div>
+        <div class="pse-reason">All three dimensions critical. 61K monthly impressions, 2.6% CTR. 72% bounce rate. 5% ATC. Missing: CFM rating, fuel type, vehicle fitment table, installation notes. Highest single-SKU revenue opportunity in the catalog.</div>
+      </div>
+
+      <div class="pse">
+        <div class="pse-header">
+          <div><div class="pse-name">K&N 57 Series Cold Air Intake</div><div class="pse-sku">KNN-57-2551 · Engine &amp; Drivetrain · Intake Systems</div></div>
+          <div style="text-align:right"><div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);margin-bottom:4px">PRIORITY SCORE</div><div class="pse-score sc-r">91</div></div>
+        </div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#93c5fd">🔍 Search (33%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:34%;background:#3b82f6"></div></div><span class="pse-bar-val" style="color:#93c5fd">34</span></div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#c4b5fd">🗂 Find (33%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:31%;background:#7c3aed"></div></div><span class="pse-bar-val" style="color:#c4b5fd">31</span></div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#86efac">🛒 Buy (34%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:36%;background:#16a34a"></div></div><span class="pse-bar-val" style="color:#86efac">36</span></div>
+        <div class="pse-reason">54K monthly impressions, 3.4% CTR (below 4.7% avg). Missing year/make/model fitment table — the primary reason buyers bounce and don't convert on intake products.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="pse">
+        <div class="pse-header">
+          <div><div class="pse-name">Bilstein B8 Shock Absorber</div><div class="pse-sku">BIL-24-196474 · Suspension &amp; Steering · Shocks</div></div>
+          <div style="text-align:right"><div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);margin-bottom:4px">PRIORITY SCORE</div><div class="pse-score sc-r">88</div></div>
+        </div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#93c5fd">🔍 Search (33%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:44%;background:#3b82f6"></div></div><span class="pse-bar-val" style="color:#93c5fd">44</span></div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#c4b5fd">🗂 Find (33%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:40%;background:#7c3aed"></div></div><span class="pse-bar-val" style="color:#c4b5fd">40</span></div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#86efac">🛒 Buy (34%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:46%;background:#16a34a"></div></div><span class="pse-bar-val" style="color:#86efac">46</span></div>
+        <div class="pse-reason">Slightly better across all three than Engine SKUs but still critical. Application list is incomplete — buyers can't confirm fitment for their specific truck/SUV. High ATC abandonment in Suspension category.</div>
+      </div>
+
+      <div class="pse">
+        <div class="pse-header">
+          <div><div class="pse-name">Flowmaster Super 44 Muffler</div><div class="pse-sku">FLO-942445 · Exhaust Systems · Mufflers</div></div>
+          <div style="text-align:right"><div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);margin-bottom:4px">PRIORITY SCORE</div><div class="pse-score sc-y">52</div></div>
+        </div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#93c5fd">🔍 Search (33%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:78%;background:#3b82f6"></div></div><span class="pse-bar-val" style="color:#93c5fd">78</span></div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#c4b5fd">🗂 Find (33%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:74%;background:#7c3aed"></div></div><span class="pse-bar-val" style="color:#c4b5fd">74</span></div>
+        <div class="pse-bar-row"><span class="pse-bar-label" style="color:#86efac">🛒 Buy (34%)</span><div class="pse-bar-track"><div class="pse-bar-fill" style="width:71%;background:#16a34a"></div></div><span class="pse-bar-val" style="color:#86efac">71</span></div>
+        <div class="pse-reason">Exhaust category performs well overall. This SKU has moderate gaps — inlet/outlet diameter missing, vehicle fitment list partial. Does <em>not</em> belong in Month 1 batch ahead of Engine SKUs. Promotion-eligible as-is.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly cycle -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Monthly Production Calendar</div>
+  <div class="cycle-row mb20">
+    <div class="cycle-step">
+      <div class="cs-date">Month Start</div>
+      <div class="cs-title">Signal Refresh</div>
+      <div class="cs-desc">GSC + GA4 data pulled for prior 30 days. Priority scores recalculated across all JEGS SKUs.</div>
+      <div class="cs-owner">Owner: Pivotree Data Team</div>
+    </div>
+    <div class="cycle-step">
+      <div class="cs-date">Day 5</div>
+      <div class="cs-title">Queue Generated</div>
+      <div class="cs-desc">Top 500 SKUs by Priority Score become the proposed batch. Queue preview sent to JEGS for review.</div>
+      <div class="cs-owner">Owner: Pivotree Program Lead</div>
+    </div>
+    <div class="cycle-step">
+      <div class="cs-date">Day 10</div>
+      <div class="cs-title">Batch Preview Delivered</div>
+      <div class="cs-desc">JEGS receives the proposed 500-SKU list with Priority Scores, gap reasons, and enrichment notes.</div>
+      <div class="cs-owner">Owner: Pivotree Program Lead → JEGS</div>
+    </div>
+    <div class="cycle-step">
+      <div class="cs-date">Day 15</div>
+      <div class="cs-title">JEGS Approves</div>
+      <div class="cs-desc">JEGS approves or adjusts the batch. Late approval shifts delivery. Lock is firm after Day 15.</div>
+      <div class="cs-owner">Owner: JEGS Catalog Contact</div>
+    </div>
+    <div class="cycle-step">
+      <div class="cs-date">End of Month</div>
+      <div class="cs-title">Delivery</div>
+      <div class="cs-desc">Enriched flat file delivered. JEGS imports to PIM within 5 business days. Confirms receipt in writing.</div>
+      <div class="cs-owner">Owner: Pivotree Delivery Team</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 5: COMPLETENESS ═══════════════ -->
+<div id="page-completeness" class="page">
+  <div class="sec-eyebrow">Completeness Scoring</div>
+  <div class="sec-title">How Attribute Completeness Gets Scored</div>
+  <div class="sec-sub">Completeness scoring measures how complete each enriched SKU is against the approved attribute standard. Unlike the signal scores (which come from GSC + GA4), completeness is measured directly against the catalog data. This section has open decisions that require JEGS input and delivery team sign-off before production begins.</div>
+
+  <div class="comp-warning mb20">
+    <div style="font-size:20px;flex-shrink:0">🚩</div>
+    <div class="comp-warn-txt">
+      <strong>This section contains the most open decisions in the scoring model.</strong> We are doing the normalization work, but JEGS owns the taxonomy and schema. We do not have direct PIM access. The completeness model cannot be finalized until (1) JEGS provides or approves the attribute standard, (2) we determine how to maintain a working copy of the JEGS catalog internally, and (3) QA acceptance thresholds are defined. None of these are resolved yet. The open questions below must be answered before Month 1 production begins.
+    </div>
+  </div>
+
+  <!-- How completeness works -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Completeness Scoring — How It Works When Resolved</div>
+  <div class="g2 mb24">
+    <div class="card">
+      <div class="card-title" style="color:#f1f5f9;margin-bottom:12px">The Basic Calculation</div>
+      <div class="score-formula" style="margin-bottom:0;padding:16px 18px">
+        <div class="formula-label">Attribute Completeness %</div>
+        <div class="formula-eq" style="font-size:13px">
+          Completeness <span class="eq-op">=</span> <span class="eq-s">Populated Required Attrs</span> <span class="eq-op">÷</span> <span class="eq-b">Total Required Attrs</span> <span class="eq-op">×</span> <span class="eq-w">100</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:14px;line-height:1.7">Example: a carburetor SKU has 12 required attributes per the approved standard. After enrichment, 9 are populated. Completeness = 75%. The 3 missing attributes are flagged in the delivery report for JEGS review.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#f1f5f9;margin-bottom:12px">Required vs. Optional Attributes</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:rgba(255,255,255,.65)">
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><strong style="color:#86efac">Required:</strong> Attributes without which a buyer cannot evaluate or purchase the product. For automotive: vehicle fitment table, core dimensions, compatibility notes. Missing = completeness penalty.</div>
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><strong style="color:#fcd34d">Recommended:</strong> Attributes that improve conversion but aren't blocking. Long-form descriptions, install notes, secondary images. Not penalized in completeness score but tracked.</div>
+        <div style="padding:10px 14px;background:rgba(0,0,0,.25);border-radius:var(--r)"><strong style="color:rgba(255,255,255,.4)">Optional:</strong> Nice-to-have. Videos, 3D assets, cross-references. Not scored.</div>
+        <div style="padding:10px 14px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:var(--r);color:#fbbf24"><strong>⚠️ The required/recommended split must be defined by JEGS per category.</strong> We cannot set this unilaterally.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JEGS Example attribute set -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Illustrative Attribute Standard — Engine &amp; Drivetrain (Carburetors)</div>
+  <div class="card mb24" style="overflow-x:auto">
+    <div class="alert-open" style="margin-bottom:14px"><div style="font-size:14px;flex-shrink:0">📌</div><div class="alert-open-txt">This is an <strong>illustrative example only</strong> — representative of what a carburetor attribute standard might look like. The actual standard must be documented in the Enrichment Standards doc (Week 5 deliverable) and approved by JEGS before production begins.</div></div>
+    <table class="gap-table">
+      <thead><tr><th>Attribute</th><th>Type</th><th>Required?</th><th>JEGS-Provided?</th><th>Enrichment Source</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Vehicle Fitment Table</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">ACES data</td><td><span class="gap-pill gp-r">Required</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Partial — gaps identified</td><td style="font-size:11px;color:rgba(255,255,255,.4)">ACES database + manufacturer spec sheets</td></tr>
+        <tr><td style="font-weight:600">CFM Rating</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">numeric</td><td><span class="gap-pill gp-r">Required</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Often missing</td><td style="font-size:11px;color:rgba(255,255,255,.4)">Manufacturer spec sheet</td></tr>
+        <tr><td style="font-weight:600">Fuel Type Compatibility</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">enum</td><td><span class="gap-pill gp-r">Required</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Often missing</td><td style="font-size:11px;color:rgba(255,255,255,.4)">Manufacturer spec sheet</td></tr>
+        <tr><td style="font-weight:600">Carburetor Style (2-bbl / 4-bbl)</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">enum</td><td><span class="gap-pill gp-r">Required</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Usually present</td><td style="font-size:11px;color:rgba(255,255,255,.4)">Existing catalog data</td></tr>
+        <tr><td style="font-weight:600">Finish / Material</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">text</td><td><span class="gap-pill gp-r">Required</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Mixed</td><td style="font-size:11px;color:rgba(255,255,255,.4)">Manufacturer spec sheet</td></tr>
+        <tr><td style="font-weight:600">Short Description (150–200 chars)</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">text</td><td><span class="gap-pill gp-y">Recommended</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Often generic/missing</td><td style="font-size:11px;color:rgba(255,255,255,.4)">AI-generated + human QA</td></tr>
+        <tr><td style="font-weight:600">Long Description (400–600 chars)</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">text</td><td><span class="gap-pill gp-y">Recommended</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Often missing</td><td style="font-size:11px;color:rgba(255,255,255,.4)">AI-generated + human QA</td></tr>
+        <tr><td style="font-weight:600">Installation Notes</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">text</td><td><span class="gap-pill gp-y">Recommended</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Rarely present</td><td style="font-size:11px;color:rgba(255,255,255,.4)">Manufacturer docs</td></tr>
+        <tr><td style="font-weight:600">Primary Image</td><td style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4)">asset</td><td><span class="gap-pill gp-y">Recommended</span></td><td style="color:rgba(255,255,255,.4);font-size:11px">Varies</td><td style="font-size:11px;color:rgba(255,255,255,.4)">JEGS must provide</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Open questions on completeness -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Open Decisions — Completeness Scoring</div>
+
+  <div class="open-q">
+    <div class="oq-num">Open Question 01 — Catalog Storage</div>
+    <div class="oq-q">How do we maintain a working copy of the JEGS catalog internally?</div>
+    <div class="oq-context">We do not have direct PIM access. To score completeness before and after enrichment, we need a representation of the JEGS catalog in our environment. Options include: (a) JEGS exports a full catalog CSV at kickoff and sends updates monthly, (b) we derive a working catalog from the flat files we've already delivered back, (c) JEGS grants read-only PIM API access for reporting purposes only. Each option has different data freshness, operational overhead, and contractual implications. This needs to be a design decision made with JEGS and Data Mo before production begins.</div>
+    <div><span class="oq-owner">Owner: Data Mo + JEGS Catalog Contact</span></div>
+  </div>
+
+  <div class="open-q">
+    <div class="oq-num">Open Question 02 — Attribute Standard Ownership</div>
+    <div class="oq-q">Who defines the required attribute list per category, and how is it kept current?</div>
+    <div class="oq-context">JEGS provides the taxonomy and schema. We do the normalization. The required attribute list per category (what "complete" means) must be jointly agreed during the Week 5 Enrichment Standards sign-off. We need to know: how many categories, how many attributes per category, and who on the JEGS side has authority to approve the standard. Changes after approval require a Change Order.</div>
+    <div><span class="oq-owner">Owner: Pivotree Delivery Lead + JEGS Catalog Contact</span></div>
+  </div>
+
+  <div class="open-q">
+    <div class="oq-num">Open Question 03 — QA Acceptance Thresholds</div>
+    <div class="oq-q">What completeness % floor must an enriched SKU hit before it passes internal QA?</div>
+    <div class="oq-context">Data Mo and Chantal Schweizer are required to define: minimum completeness % for a SKU to pass QA (e.g., 85% of required attributes populated), maximum exception rate per batch (e.g., no more than 10% of SKUs returned for client review), and what happens to SKUs that fail QA — remediate before delivery or flag for JEGS input. This is listed as OUTSTANDING in the Delivery Playbook (Item #2). Must be resolved before Month 1 production.</div>
+    <div><span class="oq-owner">Owner: Data Mo + Chantal Schweizer · Due: Before Month 1 production</span></div>
+  </div>
+
+  <div class="open-q">
+    <div class="oq-num">Open Question 04 — Pre-Enrichment Baseline</div>
+    <div class="oq-q">How do we establish the completeness baseline for JEGS SKUs before any enrichment?</div>
+    <div class="oq-context">To demonstrate improvement, we need a before/after view of completeness per SKU. This requires scoring the existing catalog state at kickoff. That requires a catalog snapshot from JEGS (see Question 01). The baseline is also the foundation for the Quarterly KPI Review — without it, we can't show progress. Propose: JEGS provides a full catalog export at Week 1, we score completeness against the agreed attribute standard as our Month 0 baseline, and we track delta each month.</div>
+    <div><span class="oq-owner">Owner: Data Mo · Needed by: Week 3</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 6: WORKED EXAMPLES ═══════════════ -->
+<div id="page-worked" class="page">
+  <div class="sec-eyebrow">Worked Examples</div>
+  <div class="sec-title">Three SKUs — Full Score Walkthrough</div>
+  <div class="sec-sub">These worked examples show how a real JEGS SKU moves through the full scoring pipeline — from raw signal inputs to Priority Score to queue position. Use these during delivery team onboarding and when explaining the model to JEGS stakeholders.</div>
+
+  <!-- Example 1 -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Example 1 — Highest Priority: Critical on All Three Dimensions</div>
+  <div class="sku-example mb28">
+    <div class="se-header">
+      <div>
+        <div class="se-sku">EDB-1406 · Engine &amp; Drivetrain / Carburetors</div>
+        <div class="se-name">Edelbrock Performer Series 650 CFM Carburetor</div>
+        <div class="se-brand">Brand: Edelbrock · Monthly impressions: 61,200</div>
+      </div>
+      <div class="se-priority">
+        <div class="se-pri-label">Priority Score</div>
+        <div class="se-pri-num">94 / 100</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#fca5a5;margin-top:2px">Batch Position: #2</div>
+      </div>
+    </div>
+    <div class="se-signals">
+      <div class="se-sig">
+        <div class="se-sig-src">GSC — Search Signal</div>
+        <div class="se-sig-title">Impressions / CTR</div>
+        <div class="se-sig-val se-gap-crit">2.6%</div>
+        <div class="se-sig-bench">Category avg: 4.7% · Gap: −2.1pp</div>
+      </div>
+      <div class="se-sig">
+        <div class="se-sig-src">GA4 — Find Signal</div>
+        <div class="se-sig-title">Bounce Rate</div>
+        <div class="se-sig-val se-gap-crit">74%</div>
+        <div class="se-sig-bench">Category avg: 67% · High bounce</div>
+      </div>
+      <div class="se-sig">
+        <div class="se-sig-src">GA4 — Buy Signal</div>
+        <div class="se-sig-title">Add-to-Cart Rate</div>
+        <div class="se-sig-val se-gap-crit">4.8%</div>
+        <div class="se-sig-bench">Category avg: 5% · Below avg</div>
+      </div>
+    </div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#93c5fd">🔍 Search Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:31%;background:#3b82f6"></div></div><span class="se-score-num" style="color:#fca5a5">31</span></div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#c4b5fd">🗂 Find Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:28%;background:#7c3aed"></div></div><span class="se-score-num" style="color:#fca5a5">28</span></div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#86efac">🛒 Buy Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:33%;background:#16a34a"></div></div><span class="se-score-num" style="color:#fca5a5">33</span></div>
+    <div class="se-why">Why it's #2 in the queue: 61K monthly impressions with a 2.1pp CTR gap means this SKU is appearing in front of a lot of buyers and failing to attract clicks. The buyers who do click bounce at 74% — they can't evaluate the product. Missing: CFM rating, fuel type, installation notes, and a complete vehicle application table. Fixing these directly addresses all three signal gaps simultaneously. Expected score improvement after enrichment: Search +20–30pts, Find +25–35pts, Buy +15–20pts.</div>
+  </div>
+
+  <!-- Example 2 -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Example 2 — Search Gap Only: Good Find and Buy, Weak Search</div>
+  <div class="sku-example mb28">
+    <div class="se-header">
+      <div>
+        <div class="se-sku">STP-127.58013R · Brakes / Brake Rotors</div>
+        <div class="se-name">StopTech Sport Slotted/Drilled Brake Rotor</div>
+        <div class="se-brand">Brand: StopTech · Monthly impressions: 28,400</div>
+      </div>
+      <div class="se-priority">
+        <div class="se-pri-label">Priority Score</div>
+        <div class="se-pri-num" style="color:#fcd34d">61 / 100</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#fcd34d;margin-top:2px">Batch Position: ~#180</div>
+      </div>
+    </div>
+    <div class="se-signals">
+      <div class="se-sig">
+        <div class="se-sig-src">GSC — Search Signal</div>
+        <div class="se-sig-title">Impressions / CTR</div>
+        <div class="se-sig-val se-gap-crit">3.1%</div>
+        <div class="se-sig-bench">Category avg: 6.2% · Gap: −3.1pp</div>
+      </div>
+      <div class="se-sig">
+        <div class="se-sig-src">GA4 — Find Signal</div>
+        <div class="se-sig-title">Bounce Rate</div>
+        <div class="se-sig-val se-gap-good">42%</div>
+        <div class="se-sig-bench">Category avg: 58% · Good engagement</div>
+      </div>
+      <div class="se-sig">
+        <div class="se-sig-src">GA4 — Buy Signal</div>
+        <div class="se-sig-title">Add-to-Cart Rate</div>
+        <div class="se-sig-val se-gap-good">14.2%</div>
+        <div class="se-sig-bench">Category avg: 14% · On benchmark</div>
+      </div>
+    </div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#93c5fd">🔍 Search Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:44%;background:#3b82f6"></div></div><span class="se-score-num" style="color:#fcd34d">44</span></div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#c4b5fd">🗂 Find Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:74%;background:#7c3aed"></div></div><span class="se-score-num" style="color:#86efac">74</span></div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#86efac">🛒 Buy Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:71%;background:#16a34a"></div></div><span class="se-score-num" style="color:#86efac">71</span></div>
+    <div class="se-why">Pattern: buyers who find this SKU engage well and convert at a healthy rate. The problem is upstream — the product title and meta description aren't matching the language buyers use to search. Enrichment target: product title optimization and query-aligned description to close the CTR gap. Find and Buy enrichment is lower priority here — don't fix what isn't broken. Focused intervention: title + search metadata only.</div>
+  </div>
+
+  <!-- Example 3 -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Example 3 — Promotion-Eligible: Already Strong, Stays Out of Enrichment Queue</div>
+  <div class="sku-example">
+    <div class="se-header">
+      <div>
+        <div class="se-sku">FLO-942445 · Exhaust Systems / Mufflers</div>
+        <div class="se-name">Flowmaster Super 44 Series Muffler</div>
+        <div class="se-brand">Brand: Flowmaster · Monthly impressions: 44,800</div>
+      </div>
+      <div class="se-priority">
+        <div class="se-pri-label">Priority Score</div>
+        <div class="se-pri-num" style="color:#86efac">21 / 100</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#86efac;margin-top:2px">Not in Month 1 batch</div>
+      </div>
+    </div>
+    <div class="se-signals">
+      <div class="se-sig">
+        <div class="se-sig-src">GSC — Search Signal</div>
+        <div class="se-sig-title">Impressions / CTR</div>
+        <div class="se-sig-val se-gap-good">8.9%</div>
+        <div class="se-sig-bench">Category avg: 7.1% · Above benchmark</div>
+      </div>
+      <div class="se-sig">
+        <div class="se-sig-src">GA4 — Find Signal</div>
+        <div class="se-sig-title">Bounce Rate</div>
+        <div class="se-sig-val se-gap-good">38%</div>
+        <div class="se-sig-bench">Category avg: 41% · Low bounce</div>
+      </div>
+      <div class="se-sig">
+        <div class="se-sig-src">GA4 — Buy Signal</div>
+        <div class="se-sig-title">Add-to-Cart Rate</div>
+        <div class="se-sig-val se-gap-good">17.4%</div>
+        <div class="se-sig-bench">Category avg: 17% · On benchmark</div>
+      </div>
+    </div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#93c5fd">🔍 Search Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:82%;background:#3b82f6"></div></div><span class="se-score-num" style="color:#86efac">82</span></div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#c4b5fd">🗂 Find Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:78%;background:#7c3aed"></div></div><span class="se-score-num" style="color:#86efac">78</span></div>
+    <div class="se-score-row"><span class="se-score-label" style="color:#86efac">🛒 Buy Score</span><div class="se-score-bar"><div class="se-score-fill" style="width:74%;background:#16a34a"></div></div><span class="se-score-num" style="color:#86efac">74</span></div>
+    <div class="se-why">This SKU is already outperforming category benchmarks on all three signals. It does not belong in the enrichment queue ahead of Engine and Suspension SKUs — enriching it first would be a waste of the monthly capacity. Mark it as promotion-eligible in the Sales &amp; Marketing view. Revisit in Month 3 if scores decay.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 7: OPEN QUESTIONS ═══════════════ -->
+<div id="page-openq" class="page">
+  <div class="sec-eyebrow">Open Questions</div>
+  <div class="sec-title">Decisions Required Before Production</div>
+  <div class="sec-sub">These are the unresolved items that affect how scoring and prioritization work in practice. Each one has an owner and a blocking dependency identified. None of these should be answered by the delivery team unilaterally — they require input from Data Mo, JEGS, or both.</div>
+
+  <div class="open-q mb20">
+    <div class="oq-num">Open Question 01 — Critical · Blocks Month 1 Production</div>
+    <div class="oq-q">How do we maintain a working copy of the JEGS catalog to score completeness?</div>
+    <div class="oq-context">We don't have PIM access. To score attribute completeness before and after enrichment, we need an internal representation of the JEGS catalog. Three options need to be evaluated: (a) JEGS provides a full catalog export at kickoff + monthly delta files, (b) we build our working catalog from the flat files we deliver back to JEGS (backward-constructing completeness), or (c) JEGS grants read-only PIM API access for reporting only. Option (a) is simplest operationally but depends on JEGS willingness and export format. This decision shapes the completeness model, the KPI baseline process, and the quarterly reporting format.</div>
+    <div style="margin-top:8px"><span class="oq-owner">Owner: Data Mo + JEGS Catalog Contact</span></div>
+    <div style="margin-top:6px"><span class="oq-owner" style="color:#fca5a5">Blocks: Completeness baseline · Month 0 KPI report · QA acceptance criteria</span></div>
+  </div>
+
+  <div class="open-q mb20">
+    <div class="oq-num">Open Question 02 — Critical · Blocks Enrichment Standards Sign-Off (Week 5)</div>
+    <div class="oq-q">Who at JEGS approves the required attribute standard per category, and what is their change process?</div>
+    <div class="oq-context">The Enrichment Standards doc (Week 5 deliverable) defines what "complete" means for each category. JEGS must approve this before production begins. We need to know: who has authority to approve (catalog manager, eCommerce director, or both?), whether approval is category-by-category or all-at-once, and what the process is for changing the standard after approval — each change is effectively a Change Order that affects QA thresholds and prior batch scores. Get this in writing at the kickoff call.</div>
+    <div style="margin-top:8px"><span class="oq-owner">Owner: Pivotree Program Lead + JEGS eCommerce Sponsor</span></div>
+    <div style="margin-top:6px"><span class="oq-owner" style="color:#fca5a5">Blocks: Milestone 2 sign-off · First batch production</span></div>
+  </div>
+
+  <div class="open-q mb20">
+    <div class="oq-num">Open Question 03 — Critical · Delivery Playbook Item #2</div>
+    <div class="oq-q">What are the QA acceptance thresholds? Completeness % floor, exception rate ceiling, description length minimum?</div>
+    <div class="oq-context">Data Mo and Chantal Schweizer must define: the minimum completeness % a SKU must achieve before it passes internal QA and ships to JEGS (e.g., 85% of required attributes populated), the maximum acceptable exception rate per batch (e.g., no more than 10% of SKUs returned for client review), and minimum description length by category. Without these thresholds, the delivery team cannot make consistent QA decisions and client expectations cannot be set. This is OUTSTANDING in the Delivery Playbook as Item #2.</div>
+    <div style="margin-top:8px"><span class="oq-owner">Owner: Data Mo + Chantal Schweizer</span></div>
+    <div style="margin-top:6px"><span class="oq-owner" style="color:#fca5a5">Blocks: Internal QA · Delivery quality guarantee to JEGS</span></div>
+  </div>
+
+  <div class="open-q mb20">
+    <div class="oq-num">Open Question 04 — Important · Scoring Model Accuracy</div>
+    <div class="oq-q">Does JEGS have a <code style="font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">fitment_conflict_exit</code> custom GA4 event instrumented?</div>
+    <div class="oq-context">Fitment conflict exits — sessions where a buyer selected a vehicle and then left without adding to cart — are a high-value Buy Score signal for automotive aftermarket. If JEGS has this event firing, it significantly improves the Buy Score accuracy for fitment-dependent categories (Engine, Suspension). If not, the Buy Score relies solely on ATC and checkout rates, which are less diagnostic. Confirm with the JEGS tech or analytics contact during Week 1. If the event isn't instrumented, we can recommend they add it — but we cannot assume it exists.</div>
+    <div style="margin-top:8px"><span class="oq-owner">Owner: Pivotree Data Team + JEGS Analytics/Tech Contact</span></div>
+    <div style="margin-top:6px"><span class="oq-owner" style="color:#fbbf24">Blocks: Buy Score accuracy for Engine + Suspension categories</span></div>
+  </div>
+
+  <div class="open-q mb20">
+    <div class="oq-num">Open Question 05 — Important · Score Model Calibration</div>
+    <div class="oq-q">Should Buy be weighted higher than Search and Find for the JEGS catalog, given the high purchase-intent nature of aftermarket auto buyers?</div>
+    <div class="oq-context">The current 33/33/34 equal weighting is the starting model. Automotive aftermarket buyers searching for specific performance parts (LS7 cam, coilover kit for a specific truck) are typically further down the purchase funnel than general retail buyers — they've often already decided what they want and are confirming fitment before buying. This suggests Buy signal gaps may deserve higher weight. The counter-argument: if a SKU can't be found (low Search), it doesn't matter how good the Buy score is. Propose reviewing after Month 2 data is available, comparing enrichment outcomes across weight configurations. Document decision and rationale before applying any weight change.</div>
+    <div style="margin-top:8px"><span class="oq-owner">Owner: Data Mo · Review: After Month 2 data</span></div>
+    <div style="margin-top:6px"><span class="oq-owner" style="color:#fbbf24">Affects: Priority Score rankings · Enrichment queue order</span></div>
+  </div>
+
+  <!-- Summary table -->
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;margin-top:28px">Open Questions Summary</div>
+  <div class="card" style="overflow-x:auto">
+    <table class="gap-table">
+      <thead><tr><th>#</th><th>Question</th><th>Owner</th><th>Blocks</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td style="font-family:var(--mono);color:rgba(255,255,255,.4)">01</td><td style="font-weight:500">Catalog storage / completeness baseline</td><td style="font-size:11px;color:rgba(255,255,255,.5)">Data Mo + JEGS</td><td><span class="gap-pill gp-r" style="font-size:10px">Month 1 production</span></td><td><span class="req-badge rb-crit">OPEN</span></td></tr>
+        <tr><td style="font-family:var(--mono);color:rgba(255,255,255,.4)">02</td><td style="font-weight:500">JEGS attribute standard approval authority</td><td style="font-size:11px;color:rgba(255,255,255,.5)">Program Lead + JEGS sponsor</td><td><span class="gap-pill gp-r" style="font-size:10px">Milestone 2 / Week 5</span></td><td><span class="req-badge rb-crit">OPEN</span></td></tr>
+        <tr><td style="font-family:var(--mono);color:rgba(255,255,255,.4)">03</td><td style="font-weight:500">QA acceptance thresholds</td><td style="font-size:11px;color:rgba(255,255,255,.5)">Data Mo + Chantal</td><td><span class="gap-pill gp-r" style="font-size:10px">Internal QA process</span></td><td><span class="req-badge rb-crit">OPEN</span></td></tr>
+        <tr><td style="font-family:var(--mono);color:rgba(255,255,255,.4)">04</td><td style="font-weight:500">fitment_conflict_exit event confirmed?</td><td style="font-size:11px;color:rgba(255,255,255,.5)">Data Team + JEGS tech</td><td><span class="gap-pill gp-y" style="font-size:10px">Buy Score accuracy</span></td><td><span class="req-badge rb-crit">OPEN</span></td></tr>
+        <tr><td style="font-family:var(--mono);color:rgba(255,255,255,.4)">05</td><td style="font-weight:500">Score weighting review (Buy uplift?)</td><td style="font-size:11px;color:rgba(255,255,255,.5)">Data Mo</td><td><span class="gap-pill gp-y" style="font-size:10px">Queue accuracy Month 2+</span></td><td><span class="req-badge rb-crit">OPEN · Month 2</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /main -->
+<div class="tc" id="tc"></div>
+
+<script>
+document.getElementById('ld').textContent=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+function goPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showToast(msg,icon='✅'){
+  const c=document.getElementById('tc'),t=document.createElement('div');
+  t.className='toast';t.innerHTML=`<span style="color:var(--teal)">${icon}</span><span>${msg}</span>`;
+  c.appendChild(t);setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300);},3000);
+}
+
+// Animate bars on page load
+document.querySelectorAll('.pse-bar-fill,.se-score-fill').forEach(el=>{
+  const w=el.style.width;el.style.width='0';
+  setTimeout(()=>{el.style.transition='width 1s ease';el.style.width=w;},200);
+});
+</script>
+</body>
+</html>
