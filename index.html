@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ascend Catalog Pro — JEGS High Performance | Pivotree</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pt-teal:#0f9d82;--pt-teal-light:#e0f5f1;--pt-teal-dark:#0a7d68;
+  --pt-navy:#1a2b4a;--pt-navy-mid:#243660;
+  --pt-orange:#e8622a;
+  --pt-blue:#2563eb;--pt-blue-light:#eff6ff;
+  --pt-gray-50:#f8fafc;--pt-gray-100:#f1f5f9;--pt-gray-200:#e2e8f0;
+  --pt-gray-300:#cbd5e1;--pt-gray-400:#94a3b8;--pt-gray-500:#64748b;
+  --pt-gray-600:#475569;--pt-gray-700:#334155;--pt-gray-800:#1e293b;
+  --pt-green:#16a34a;--pt-green-light:#dcfce7;
+  --pt-yellow:#d97706;--pt-yellow-light:#fef3c7;
+  --pt-red:#dc2626;--pt-red-light:#fee2e2;
+  --pt-purple:#7c3aed;--pt-purple-light:#ede9fe;
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+  --sh-sm:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 12px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--pt-gray-50);color:var(--pt-gray-800);font-size:14px;line-height:1.5;}
+
+/* ── HEADER ── */
+.hdr{background:var(--pt-navy);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hdr-left{display:flex;align-items:center;gap:14px;}
+.hdr-div{width:1px;height:18px;background:rgba(255,255,255,.18);}
+.cbadge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-md);padding:4px 10px;font-size:12px;font-weight:500;color:rgba(255,255,255,.9);display:flex;align-items:center;gap:6px;}
+.cav{width:20px;height:20px;border-radius:4px;background:#e8622a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+.hbtn{padding:6px 12px;border-radius:var(--r-md);font-size:12px;font-weight:500;cursor:pointer;border:none;display:flex;align-items:center;gap:6px;}
+.hbtn-lib{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);}
+.hbtn-lib:hover{background:rgba(255,255,255,.18);}
+.hbtn-add{background:var(--pt-orange);color:#fff;}
+.hbtn-add:hover{background:#d4541f;}
+.livebadge{background:#16a34a;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
+.betabadge{background:rgba(124,58,237,.7);border:1px solid rgba(196,181,253,.4);color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:99px;display:flex;align-items:center;gap:5px;}
+.betadot{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+.livedate{font-size:11px;color:rgba(255,255,255,.55);}
+.uav{width:32px;height:32px;border-radius:50%;background:var(--pt-teal);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer;}
+
+/* ── SIGNAL BAR ── */
+.sigbar{background:#fff;border-bottom:1px solid var(--pt-gray-200);padding:0 24px;height:38px;display:flex;align-items:center;gap:0;position:sticky;top:56px;z-index:98;}
+.sigbar-lbl{font-size:10px;font-weight:700;color:var(--pt-gray-400);text-transform:uppercase;letter-spacing:.6px;margin-right:14px;}
+.sig-item{display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;border-right:1px solid var(--pt-gray-100);}
+.sig-item:first-of-type{border-left:1px solid var(--pt-gray-100);}
+.sig-dot-live{width:8px;height:8px;border-radius:50%;background:var(--pt-green);box-shadow:0 0 0 2px #86efac;flex-shrink:0;}
+.sig-dot-cs{width:8px;height:8px;border-radius:50%;background:var(--pt-gray-300);flex-shrink:0;}
+.sig-name{font-size:11px;font-weight:600;}
+.sig-name-live{color:var(--pt-navy);}
+.sig-name-cs{color:var(--pt-gray-400);}
+.sig-status-live{font-size:10px;color:var(--pt-green);font-weight:600;}
+.sig-status-cs{font-size:10px;color:var(--pt-gray-300);font-weight:500;}
+.sig-cs-badge{font-size:9px;background:var(--pt-gray-100);color:var(--pt-gray-400);padding:1px 6px;border-radius:99px;font-weight:600;margin-left:2px;}
+
+/* ── TAB NAV ── */
+.tnav{background:#fff;border-bottom:1px solid var(--pt-gray-200);padding:0 24px;display:flex;align-items:center;position:sticky;top:94px;z-index:99;}
+.tbtn{padding:13px 16px;font-size:13px;font-weight:500;color:var(--pt-gray-500);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.tbtn:hover{color:var(--pt-navy);}
+.tbtn.active{color:var(--pt-teal);border-bottom-color:var(--pt-teal);}
+.aibadge{background:linear-gradient(135deg,#7c3aed,#0f9d82);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:99px;}
+
+/* ── MAIN ── */
+.main{padding:24px;max-width:1400px;margin:0 auto;}
+.tab{display:none;}.tab.active{display:block;}
+
+/* ── CARD ── */
+.card{background:#fff;border:1px solid var(--pt-gray-200);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-sm);}
+.mb16{margin-bottom:16px;}.mb20{margin-bottom:20px;}.mb24{margin-bottom:24px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-ttl{font-family:'Poppins',sans-serif;font-weight:600;font-size:15px;color:var(--pt-navy);}
+.card-ttl{font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;color:var(--pt-navy);margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--pt-gray-500);}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-md);font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+.btn-p{background:var(--pt-teal);color:#fff;}.btn-p:hover{background:var(--pt-teal-dark);}
+.btn-s{background:#fff;color:var(--pt-gray-700);border:1px solid var(--pt-gray-300);}.btn-s:hover{background:var(--pt-gray-50);}
+.btn-g{background:transparent;color:var(--pt-teal);border:1px solid var(--pt-teal);}.btn-g:hover{background:var(--pt-teal-light);}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-q{background:var(--pt-green-light);color:#166534;border:1px solid #86efac;cursor:default;}
+.btn-w{background:#fff;color:var(--pt-navy);font-weight:600;}.btn-w:hover{background:var(--pt-gray-100);}
+.btn-ow{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);}.btn-ow:hover{background:rgba(255,255,255,.1);}
+
+/* ── SCORE CARDS ── */
+.scard{text-align:center;padding:20px 16px;position:relative;overflow:hidden;}
+.snum{font-family:'Poppins',sans-serif;font-weight:700;font-size:44px;line-height:1;margin-bottom:2px;}
+.slbl{font-size:13px;font-weight:600;color:var(--pt-gray-600);margin-bottom:6px;}
+.sring{position:absolute;top:-20px;right:-20px;opacity:.08;}
+.sg{color:var(--pt-green);}.sy{color:var(--pt-yellow);}.sr{color:var(--pt-red);}
+.sbg-g{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac;}
+.sbg-y{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fcd34d;}
+.sbg-r{background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:#fca5a5;}
+.sdelta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;margin-bottom:4px;}
+.dup{background:var(--pt-green-light);color:#166534;}
+.ddn{background:var(--pt-red-light);color:#991b1b;}
+.dfl{background:var(--pt-gray-100);color:var(--pt-gray-600);}
+
+/* ── FILTERS ── */
+.fpill{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--pt-gray-300);background:#fff;color:var(--pt-gray-600);transition:all .15s;}
+.fpill:hover{border-color:var(--pt-teal);color:var(--pt-teal);}
+.fpill.active{background:var(--pt-teal);border-color:var(--pt-teal);color:#fff;}
+.fsel{padding:5px 10px;border:1px solid var(--pt-gray-300);border-radius:var(--r-md);font-size:12px;font-family:'Inter',sans-serif;color:var(--pt-gray-700);outline:none;background:#fff;cursor:pointer;}
+.fsel:focus{border-color:var(--pt-teal);}
+.fsel.af{border-color:var(--pt-teal);background:var(--pt-teal-light);color:var(--pt-teal-dark);font-weight:600;}
+
+/* ── EXEC SUMMARY ── */
+.execsum{background:linear-gradient(135deg,var(--pt-navy),var(--pt-navy-mid));border-radius:var(--r-lg);padding:18px 22px;color:#fff;margin-bottom:20px;display:flex;gap:20px;align-items:flex-start;}
+.es-ttl{font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.es-txt{font-size:13px;line-height:1.7;color:rgba(255,255,255,.92);}
+.es-txt strong{color:#fff;}
+.hl-g{color:#34d399;font-weight:600;}.hl-r{color:#f87171;font-weight:600;}.hl-y{color:#fbbf24;font-weight:600;}
+
+/* ── HEATMAP ── */
+.hm-grid{display:grid;grid-template-columns:180px repeat(3,1fr);gap:3px;font-size:12px;}
+.hm-hdr{padding:6px 10px;font-size:11px;font-weight:700;color:var(--pt-gray-500);text-transform:uppercase;letter-spacing:.5px;text-align:center;}
+.hm-lbl{padding:8px 10px;font-weight:600;color:var(--pt-navy);display:flex;align-items:center;font-size:12px;}
+.hm-cell{padding:10px 6px;border-radius:var(--r-sm);text-align:center;font-weight:700;font-size:13px;cursor:default;transition:transform .1s;}
+.hm-cell:hover{transform:scale(1.04);}
+
+/* ── MOVERS ── */
+.mv-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--pt-gray-100);}
+.mv-row:last-child{border-bottom:none;}
+.mv-name{flex:1;font-size:13px;font-weight:500;color:var(--pt-navy);}
+.mv-sub{font-size:11px;color:var(--pt-gray-400);}
+.mv-up{font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;color:var(--pt-green);}
+.mv-dn{font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;color:var(--pt-red);}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:20px;}
+.tl::before{content:'';position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--pt-gray-200);border-radius:99px;}
+.tl-item{position:relative;padding:0 0 18px 20px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-dot{position:absolute;left:-14px;top:3px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;}
+.tl-date{font-size:10px;font-family:'DM Mono',monospace;color:var(--pt-gray-400);margin-bottom:2px;}
+.tl-ttl{font-size:12px;font-weight:600;color:var(--pt-navy);margin-bottom:2px;}
+.tl-desc{font-size:11px;color:var(--pt-gray-500);line-height:1.5;}
+.tl-imp{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:99px;margin-top:4px;}
+.ti-up{background:var(--pt-green-light);color:#166534;}
+.ti-pend{background:var(--pt-gray-100);color:var(--pt-gray-500);}
+.ti-dn{background:var(--pt-red-light);color:#991b1b;}
+
+/* ── TABLES ── */
+.dt{width:100%;border-collapse:collapse;font-size:13px;}
+.dt th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--pt-gray-500);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--pt-gray-200);background:var(--pt-gray-50);}
+.dt td{padding:10px 12px;border-bottom:1px solid var(--pt-gray-100);color:var(--pt-gray-700);}
+.dt tr:hover td{background:var(--pt-gray-50);}
+.dt tr:last-child td{border-bottom:none;}
+.sp{display:inline-flex;align-items:center;justify-content:center;width:44px;padding:3px 0;border-radius:var(--r-sm);font-size:12px;font-weight:700;}
+.sp-g{background:var(--pt-green-light);color:#166534;}
+.sp-y{background:var(--pt-yellow-light);color:#92400e;}
+.sp-r{background:var(--pt-red-light);color:#991b1b;}
+.tu{color:var(--pt-green);font-weight:700;}.tf{color:var(--pt-gray-400);font-weight:700;}.td2{color:var(--pt-red);font-weight:700;}
+
+/* ── STAT ROW ── */
+.sr2{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--pt-gray-100);}
+.sr2:last-child{border-bottom:none;}
+.sr-l{font-size:12px;color:var(--pt-gray-600);}
+.sr-v{font-size:13px;font-weight:600;color:var(--pt-navy);font-family:'DM Mono',monospace;}
+
+/* ── METRIC CARD ── */
+.mc{background:var(--pt-gray-50);border:1px solid var(--pt-gray-200);border-radius:var(--r-md);padding:12px 14px;}
+.mc-l{font-size:11px;color:var(--pt-gray-500);margin-bottom:4px;}
+.mc-v{font-family:'Poppins',sans-serif;font-weight:700;font-size:20px;color:var(--pt-navy);}
+
+/* ── CAT BADGES ── */
+.cb{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;margin-bottom:6px;}
+.cb-eng{background:#dbeafe;color:#1e40af;}
+.cb-sus{background:#dcfce7;color:#166534;}
+.cb-exh{background:#fee2e2;color:#991b1b;}
+.cb-brk{background:#fef3c7;color:#92400e;}
+.cb-elc{background:#ede9fe;color:#5b21b6;}
+.cb-tls{background:#f1f5f9;color:#475569;}
+
+/* ── PIPELINE ── */
+.pipe-wrap{display:flex;align-items:stretch;width:100%;}
+.pipe-ph{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 8px;cursor:pointer;text-align:center;transition:all .15s;border:2px solid transparent;}
+.pipe-ph:hover{opacity:.9;transform:translateY(-1px);}
+.pipe-arr{display:flex;align-items:center;padding:0 4px;flex-shrink:0;}
+.pipe-arr-inner{position:relative;width:24px;height:2px;background:var(--pt-gray-300);}
+.pipe-arr-inner::after{content:'▶';position:absolute;right:-7px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--pt-gray-300);line-height:1;}
+.pipe-icon{font-size:20px;margin-bottom:6px;}
+.pipe-lbl{font-size:12px;font-weight:700;margin-bottom:4px;}
+.pipe-cnt{font-family:'Poppins',sans-serif;font-weight:700;font-size:22px;line-height:1;}
+.pipe-sub{font-size:10px;margin-top:3px;opacity:.75;}
+
+/* ── PROGRESS ── */
+.pw{background:var(--pt-gray-200);border-radius:99px;height:8px;overflow:hidden;}
+.pb{height:100%;border-radius:99px;}
+.pi{font-size:11px;color:var(--pt-red);font-style:italic;}
+
+/* ── AGENTIC ── */
+.ag-wrap{display:flex;gap:20px;min-height:500px;}
+.ag-side{width:260px;flex-shrink:0;}
+.ag-main{flex:1;display:flex;flex-direction:column;}
+.chat-area{flex:1;overflow-y:auto;padding:20px;background:var(--pt-gray-50);border-radius:var(--r-lg) var(--r-lg) 0 0;border:1px solid var(--pt-gray-200);border-bottom:none;max-height:480px;}
+.chat-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fff;border:1px solid var(--pt-gray-200);border-radius:0 0 var(--r-lg) var(--r-lg);}
+.chat-inp{flex:1;border:none;outline:none;font-size:13px;font-family:'Inter',sans-serif;color:var(--pt-gray-700);background:transparent;}
+.chat-inp::placeholder{color:var(--pt-gray-400);}
+.chat-send{background:var(--pt-teal);color:#fff;border:none;border-radius:var(--r-md);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;}
+.msg{margin-bottom:16px;}
+.msg-u{display:flex;justify-content:flex-end;}
+.msg-a{display:flex;gap:10px;}
+.bub-u{background:var(--pt-teal);color:#fff;padding:10px 14px;border-radius:var(--r-lg) var(--r-lg) 4px var(--r-lg);max-width:75%;font-size:13px;line-height:1.5;}
+.bub-a{background:#fff;border:1px solid var(--pt-gray-200);padding:12px 16px;border-radius:4px var(--r-lg) var(--r-lg) var(--r-lg);flex:1;font-size:13px;line-height:1.6;}
+.ai-av{width:32px;height:32px;border-radius:8px;background:var(--pt-navy);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--pt-teal);flex-shrink:0;}
+.mono{background:var(--pt-gray-800);border-radius:var(--r-md);padding:12px 14px;margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:#e2e8f0;line-height:1.8;}
+.mh{color:#34d399;font-weight:500;}.mw{color:#fbbf24;}.md{color:#94a3b8;}
+.mtag{font-size:10px;color:var(--pt-gray-400);margin-top:6px;font-family:'DM Mono',monospace;}
+.sq{padding:10px 14px;background:#fff;border:1px solid var(--pt-gray-200);border-radius:var(--r-md);font-size:12px;color:var(--pt-gray-600);cursor:pointer;margin-bottom:8px;transition:all .15s;line-height:1.4;}
+.sq:hover{background:var(--pt-teal-light);border-color:var(--pt-teal);color:var(--pt-teal-dark);}
+.slbl2{font-size:11px;font-weight:600;color:var(--pt-gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.typing span{display:inline-block;width:6px;height:6px;background:var(--pt-gray-400);border-radius:50%;margin:0 2px;animation:bounce 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-6px);}}
+
+/* ── LIBRARY ── */
+.lib-sb{width:100%;padding:12px 16px;border:2px solid var(--pt-gray-200);border-radius:var(--r-lg);font-size:14px;font-family:'Inter',sans-serif;outline:none;background:#fff;}
+.lib-sb:focus{border-color:var(--pt-teal);}
+.lib-wrap{display:flex;gap:20px;}
+.lib-filt{width:200px;flex-shrink:0;}
+.filt-sec{margin-bottom:20px;}
+.filt-lbl{font-size:11px;font-weight:700;color:var(--pt-gray-600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.filt-opt{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--pt-gray-600);cursor:pointer;}
+.filt-opt input{accent-color:var(--pt-teal);}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+.pc{background:#fff;border:1px solid var(--pt-gray-200);border-radius:var(--r-lg);overflow:hidden;transition:box-shadow .15s,transform .15s;}
+.pc:hover{box-shadow:var(--sh-md);transform:translateY(-1px);}
+.pc-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.pc-body{padding:12px;}
+.pc-brand{font-size:10px;font-weight:700;color:var(--pt-gray-400);text-transform:uppercase;letter-spacing:.5px;}
+.pc-name{font-size:12px;font-weight:600;color:var(--pt-navy);margin:2px 0 6px;line-height:1.3;}
+.pc-attrs{font-size:11px;color:var(--pt-gray-500);line-height:1.6;margin-bottom:8px;}
+.pn{font-family:'DM Mono',monospace;font-size:10px;color:var(--pt-gray-400);margin-bottom:8px;}
+.ua{border:2px dashed var(--pt-gray-300);border-radius:var(--r-lg);padding:32px;text-align:center;transition:all .15s;cursor:pointer;}
+.ua:hover{border-color:var(--pt-teal);background:var(--pt-teal-light);}
+
+/* ── INSIGHT ── */
+.insight{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:var(--r-lg);padding:16px 20px;display:flex;gap:12px;align-items:flex-start;}
+.ins-txt{font-size:13px;color:#166534;line-height:1.6;}
+.ins-txt strong{font-weight:600;}
+
+/* ── DOWNLOAD CARD ── */
+.dlcard{background:linear-gradient(135deg,var(--pt-navy),var(--pt-navy-mid));border-radius:var(--r-lg);padding:24px;color:#fff;}
+
+/* ── MODAL ── */
+.moverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,25,50,.6);z-index:200;align-items:center;justify-content:center;}
+.moverlay.open{display:flex;}
+.modal{background:#fff;border-radius:var(--r-xl);padding:28px;width:520px;max-width:95vw;box-shadow:var(--sh-md);max-height:90vh;overflow-y:auto;}
+.modal-ttl{font-family:'Poppins',sans-serif;font-weight:700;font-size:18px;color:var(--pt-navy);margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--pt-gray-500);margin-bottom:20px;}
+.fl{font-size:12px;font-weight:600;color:var(--pt-gray-700);margin-bottom:6px;display:block;}
+.fs{width:100%;padding:9px 12px;border:1px solid var(--pt-gray-300);border-radius:var(--r-md);font-size:13px;font-family:'Inter',sans-serif;color:var(--pt-gray-700);outline:none;margin-bottom:14px;}
+.fs:focus{border-color:var(--pt-teal);}
+.macts{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+.msuc{text-align:center;padding:20px 0;}
+
+/* ── TOAST ── */
+.tc{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--pt-navy);color:#fff;padding:12px 18px;border-radius:var(--r-lg);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-md);animation:tIn .3s ease;max-width:320px;}
+.ti2{color:var(--pt-teal);font-size:16px;}
+@keyframes tIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.toast.out{animation:tOut .3s ease forwards;}
+@keyframes tOut{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(100%);}}
+.divider{height:1px;background:var(--pt-gray-200);margin:20px 0;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:var(--pt-gray-300);border-radius:99px;}
+@media(max-width:900px){
+  .g3,.g2{grid-template-columns:1fr;}
+  .ag-wrap{flex-direction:column;}.ag-side{width:100%;}
+  .lib-wrap{flex-direction:column;}.lib-filt{width:100%;}
+  .pipe-wrap{flex-wrap:wrap;}.pipe-ph{min-width:80px;}
+  .sigbar{overflow-x:auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="hdr">
+  <div class="hdr-left">
+    <!-- Official Pivotree Logo SVG -->
+    <svg height="20" viewBox="0 0 998.41333 376.33334" xmlns="http://www.w3.org/2000/svg">
+      <g transform="matrix(0.13333333,0,0,-0.13333333,0,376.33333)">
+        <path d="m 814.07,993.359 c 0,38.471 -5.851,76.611 -17.531,114.411 -11.684,37.75 -29.191,71.76 -52.551,101.98 -23.363,30.22 -52.914,54.64 -88.625,73.2 -35.738,18.52 -77.64,27.83 -125.707,27.83 -45.328,0 -85.886,-9.65 -121.601,-28.88 -35.739,-19.24 -66.293,-43.99 -91.696,-74.21 -25.445,-30.22 -44.683,-64.57 -57.707,-103.04 -13.093,-38.47 -19.593,-76.94 -19.593,-115.42 0,-38.468 6.5,-76.601 19.593,-114.359 13.024,-37.801 32.262,-71.812 57.707,-102.031 25.403,-30.219 55.957,-54.59 91.696,-73.149 35.715,-18.57 76.273,-27.82 121.601,-27.82 48.067,0 89.969,9.59 125.707,28.828 35.711,19.231 65.262,43.981 88.625,74.211 23.36,30.219 40.867,64.559 52.551,103.031 11.68,38.481 17.531,76.95 17.531,115.418 z M 236.996,1483.87 v -138.08 h 6.188 c 12.375,19.22 28.492,38.81 48.425,58.74 19.907,19.89 44.325,37.78 73.176,53.58 28.856,15.79 61.473,28.86 97.883,39.15 36.387,10.31 77.305,15.47 122.637,15.47 70.058,0 134.625,-13.41 193.722,-40.2 59.051,-26.79 109.903,-63.56 152.524,-110.26 42.57,-46.7 75.529,-101.67 98.909,-164.85 23.36,-63.22 35.04,-131.24 35.04,-204.061 0,-72.82 -11.34,-141.179 -34.01,-205.07 C 1008.83,724.391 976.52,668.75 934.645,621.352 892.719,573.961 841.895,536.16 782.125,508 722.352,479.891 654.668,465.789 579.113,465.789 c -70.058,0 -134.312,14.391 -192.691,43.27 -58.406,28.832 -103.399,68.023 -134.988,117.48 h -4.125 L 247.309,0 H 0 v 1483.87 h 236.996" style="fill:#fff;stroke:none"/>
+        <path d="m 1230.23,1483.87 h 247.31 V 494.621 h -247.31 z m -35.04,335.94 c 0,39.83 14.75,74.52 44.3,104.07 29.52,29.52 66.99,44.32 112.32,44.32 45.36,0 83.47,-14.1 114.38,-42.26 30.92,-28.18 46.39,-63.56 46.39,-106.13 0,-42.6 -15.47,-78 -46.39,-106.14 -30.91,-28.18 -69.02,-42.26 -114.38,-42.26 -45.33,0 -82.8,14.75 -112.32,44.33 -29.55,29.52 -44.3,64.2 -44.3,104.07" style="fill:#fff;stroke:none"/>
+        <path d="m 1577.73,1483.87 h 269.98 l 259.68,-721.339 h 4.12 l 261.75,721.339 h 261.73 L 2241.35,494.621 h -263.79 l -399.83,989.249" style="fill:#fff;stroke:none"/>
+        <path d="m 2898.63,993.359 c 0,-38.468 5.82,-76.937 17.5,-115.418 11.66,-38.472 29.19,-72.812 52.56,-103.031 23.36,-30.23 52.88,-54.98 88.62,-74.211 35.71,-19.238 78.31,-28.828 127.79,-28.828 49.46,0 92.03,9.59 127.77,28.828 35.71,19.231 65.24,43.981 88.62,74.211 23.34,30.219 40.87,64.559 52.55,103.031 11.66,38.481 17.54,76.95 17.54,115.418 0,38.471 -5.88,76.611 -17.54,114.411 -11.68,37.75 -29.21,71.76 -52.55,101.98 -23.38,30.22 -52.91,54.64 -88.62,73.2 -35.74,18.52 -78.31,27.83 -127.77,27.83 -49.48,0 -92.08,-9.31 -127.79,-27.83 -35.74,-18.56 -65.26,-42.98 -88.62,-73.2 -23.37,-30.22 -40.9,-64.23 -52.56,-101.98 -11.68,-37.8 -17.5,-75.94 -17.5,-114.411 z m -251.44,0 c 0,78.331 14.08,149.431 42.24,213.321 28.16,63.9 66.27,118.49 114.38,163.84 48.09,45.33 105.1,80.38 171.06,105.1 65.96,24.73 136.02,37.11 210.23,37.11 74.19,0 144.27,-12.38 210.2,-37.11 65.96,-24.72 122.95,-59.77 171.06,-105.1 48.09,-45.35 86.21,-99.94 114.39,-163.84 28.16,-63.89 42.26,-134.99 42.26,-213.321 0,-78.289 -14.1,-149.757 -42.26,-214.328 -28.18,-64.609 -66.3,-119.883 -114.39,-165.929 -48.11,-46.051 -105.1,-82.071 -171.06,-108.172 -65.93,-26.09 -136.01,-39.141 -210.2,-39.141 -74.21,0 -144.27,13.051 -210.23,39.141 -65.96,26.101 -122.97,62.121 -171.06,108.172 -48.11,46.046 -86.22,101.32 -114.38,165.929 -28.16,64.571 -42.24,136.039 -42.24,214.328" style="fill:#fff;stroke:none"/>
+        <path d="m 3767.53,1286.02 v 197.85 h 173.13 v 286.48 h 243.18 v -286.48 h 247.31 V 1286.02 H 4183.84 V 826.43 c 0,-43.989 7.89,-80.348 23.7,-109.231 15.78,-28.828 51.18,-43.269 106.13,-43.269 16.5,0 34.35,1.679 53.6,5.129 19.22,3.41 36.39,8.589 51.52,15.453 l 8.23,-193.703 c -21.99,-8.25 -48.09,-14.778 -78.31,-19.579 -30.24,-4.789 -59.1,-7.242 -86.56,-7.242 -65.94,0 -119.54,9.313 -160.75,27.821 -41.23,18.57 -73.87,43.992 -97.9,76.281 -24.06,32.281 -40.54,69.359 -49.46,111.289 -8.95,41.871 -13.38,86.871 -13.38,134.98 v 461.661 h -173.13" style="fill:#fff;stroke:none"/>
+        <path d="m 4636.63,1483.87 h 237 v -164.89 h 4.12 c 27.46,57.73 65.96,104.4 115.42,140.17 49.45,35.71 107.16,53.58 173.12,53.58 9.59,0 19.91,-0.36 30.92,-1.03 10.98,-0.72 20.6,-2.43 28.85,-5.16 v -226.7 c -16.5,4.12 -30.61,6.85 -42.26,8.25 -11.68,1.34 -23.03,2.06 -33.99,2.06 -56.36,0 -101.69,-10.31 -136.04,-30.94 -34.35,-20.58 -61.14,-45.33 -80.37,-74.16 -19.26,-28.88 -32.29,-58.43 -39.15,-88.65 -6.91,-30.22 -10.31,-54.25 -10.31,-72.1 V 494.621 h -247.31 v 989.249" style="fill:#fff;stroke:none"/>
+        <path d="m 6020.17,1088.15 c 0,31.61 -4.49,61.83 -13.39,90.71 -8.97,28.83 -23.02,54.25 -42.26,76.27 -19.26,21.92 -43.63,39.48 -73.15,52.53 -29.58,13.05 -64.26,19.57 -104.1,19.57 -74.18,0 -137.05,-22.35 -188.57,-66.97 -51.52,-44.66 -80.06,-102.03 -85.53,-172.11 z m 247.3,-111.291 c 0,-10.988 0,-21.968 0,-32.961 0,-11.027 -0.69,-21.968 -2.06,-32.949 h -752.24 c 2.74,-35.789 12.02,-68.41 27.83,-97.91 15.78,-29.551 36.74,-54.969 62.86,-76.269 26.07,-21.301 55.65,-38.141 88.62,-50.461 32.96,-12.379 67.31,-18.571 103.04,-18.571 61.84,0 114.03,11.321 156.62,34.012 42.58,22.641 77.62,53.922 105.13,93.781 l 164.87,-131.91 c -97.57,-131.922 -239.08,-197.832 -424.55,-197.832 -76.97,0 -147.73,12.043 -212.29,36.02 -64.6,24.043 -120.55,58.05 -167.97,102.043 -47.39,43.937 -84.5,97.898 -111.29,161.796 -26.79,63.891 -40.17,136.332 -40.17,217.403 0,79.669 13.38,152.159 40.17,217.439 26.79,65.24 63.54,120.89 110.26,166.94 46.7,46.03 102.03,81.74 165.93,107.16 63.87,25.43 132.92,38.14 207.11,38.14 68.69,0 132.22,-11.35 190.63,-34.01 58.4,-22.67 108.89,-56.34 151.49,-100.98 42.57,-44.71 75.91,-100.3 99.97,-166.93 24,-66.68 36.04,-144.63 36.04,-233.951" style="fill:#fff;stroke:none"/>
+        <path d="m 7124.63,1088.15 c 0,31.61 -4.49,61.83 -13.39,90.71 -8.97,28.83 -23.02,54.25 -42.26,76.27 -19.26,21.92 -43.63,39.48 -73.15,52.53 -29.58,13.05 -64.26,19.57 -104.1,19.57 -74.18,0 -137.05,-22.35 -188.57,-66.97 -51.52,-44.66 -80.06,-102.03 -85.53,-172.11 z m 247.3,-111.291 c 0,-10.988 0,-21.968 0,-32.961 0,-11.027 -0.69,-21.968 -2.06,-32.949 h -752.24 c 2.74,-35.789 12.02,-68.41 27.83,-97.91 15.78,-29.551 36.74,-54.969 62.86,-76.269 26.07,-21.301 55.65,-38.141 88.63,-50.461 32.95,-12.379 67.3,-18.571 103.03,-18.571 61.84,0 114.03,11.321 156.63,34.012 42.57,22.641 77.61,53.922 105.12,93.781 l 164.87,-131.91 c -97.57,-131.922 -239.08,-197.832 -424.55,-197.832 -76.97,0 -147.73,12.043 -212.29,36.02 -64.59,24.043 -120.55,58.05 -167.97,102.043 -47.39,43.937 -84.5,97.898 -111.29,161.796 -26.79,63.891 -40.17,136.332 -40.17,217.403 0,79.669 13.38,152.159 40.17,217.439 26.79,65.24 63.54,120.89 110.26,166.94 46.7,46.03 102.03,81.74 165.93,107.16 63.87,25.43 132.92,38.14 207.11,38.14 68.69,0 132.22,-11.35 190.63,-34.01 58.4,-22.67 108.89,-56.34 151.49,-100.98 42.57,-44.71 75.91,-100.3 99.97,-166.93 24,-66.68 36.04,-144.63 36.04,-233.951" style="fill:#fff;stroke:none"/>
+        <path d="m 4241.09,2508.7 c 0,-173.34 -179.37,-313.87 -179.37,-313.87 0,0 -179.3,140.53 -179.3,313.87 0,173.31 179.3,313.84 179.3,313.84 0,0 179.37,-140.53 179.37,-313.84" style="fill:#8255b0;stroke:none"/>
+        <path d="m 3751.62,2433.23 c 150.11,-86.69 182.14,-312.27 182.14,-312.27 0,0 -211.37,-85.01 -361.48,1.64 -150.08,86.65 -182.14,312.2 -182.14,312.2 0,0 211.4,85.08 361.48,-1.57" style="fill:#f9ad16;stroke:none"/>
+        <path d="m 3572.25,1971.59 c 150.11,86.66 361.48,1.61 361.48,1.61 0,0 -32.03,-225.55 -182.14,-312.24 -150.08,-86.62 -361.45,-1.63 -361.45,-1.63 0,0 32,225.61 182.11,312.26" style="fill:#3fb33c;stroke:none"/>
+        <path d="m 4371.82,1660.94 c -150.1,86.65 -182.14,312.23 -182.14,312.23 0,0 211.37,85.05 361.47,-1.64 150.06,-86.65 182.15,-312.2 182.15,-312.2 0,0 -211.4,-85.08 -361.48,1.61" style="fill:#d7115c;stroke:none"/>
+        <path d="m 4551.15,2122.56 c -150.07,-86.68 -361.44,-1.63 -361.44,-1.63 0,0 32.01,225.58 182.14,312.23 150.08,86.63 361.45,1.64 361.45,1.64 0,0 -32,-225.61 -182.15,-312.24" style="fill:#439ada;stroke:none"/>
+      </g>
+    </svg>
+    <div class="hdr-div"></div>
+    <div class="cbadge"><div class="cav">JG</div>JEGS High Performance</div>
+    <div class="betabadge"><span class="betadot"></span>Beta · Month 1</div>
+  </div>
+  <div class="hdr-right">
+    <button class="hbtn hbtn-lib" onclick="openLib()">📚 Library</button>
+    <button class="hbtn hbtn-add" onclick="openModal()">＋ Add to Catalog</button>
+    <span class="livedate" id="ld"></span>
+    <span class="livebadge">LIVE</span>
+    <div class="uav">PT</div>
+  </div>
+</header>
+
+<!-- ═══════════ SIGNAL CONNECTION BAR ═══════════ -->
+<div class="sigbar">
+  <span class="sigbar-lbl">Data Signals</span>
+  <div class="sig-item">
+    <span class="sig-dot-live"></span>
+    <span class="sig-name sig-name-live">Google Search Console</span>
+    <span class="sig-status-live">● Live</span>
+  </div>
+  <div class="sig-item">
+    <span class="sig-dot-live"></span>
+    <span class="sig-name sig-name-live">Google Analytics 4</span>
+    <span class="sig-status-live">● Live</span>
+  </div>
+  <div class="sig-item" style="opacity:.45">
+    <span class="sig-dot-cs"></span>
+    <span class="sig-name sig-name-cs">eCommerce Platform</span>
+    <span class="sig-cs-badge">Coming Soon</span>
+  </div>
+  <div class="sig-item" style="opacity:.45">
+    <span class="sig-dot-cs"></span>
+    <span class="sig-name sig-name-cs">PIM Direct Delivery</span>
+    <span class="sig-cs-badge">Coming Soon</span>
+  </div>
+</div>
+
+<!-- ═══════════ TAB NAV ═══════════ -->
+<nav class="tnav">
+  <button class="tbtn active" data-tab="strategic" onclick="switchTab('strategic',this)">Strategic</button>
+  <button class="tbtn" data-tab="operations" onclick="switchTab('operations',this)">Operations</button>
+  <button class="tbtn" data-tab="sales" onclick="switchTab('sales',this)">Sales &amp; Marketing</button>
+  <button class="tbtn" data-tab="agentic" onclick="switchTab('agentic',this)">TowerTalk <span class="aibadge">AI</span></button>
+  <button class="tbtn" data-tab="library" onclick="switchTab('library',this)">Library</button>
+  <button class="tbtn" data-tab="program" onclick="switchTab('program',this)">Program Status</button>
+</nav>
+
+<div class="main">
+
+<!-- ═══════════ STRATEGIC ═══════════ -->
+<div id="tab-strategic" class="tab active">
+  <div class="card mb20" style="padding:14px 20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:700;color:var(--pt-gray-500);text-transform:uppercase;letter-spacing:.5px">Filter by</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--pt-gray-500)">Date range</span>
+        <div style="display:flex;gap:4px">
+          <button class="fpill active" onclick="setDate('30d',this)">30 days</button>
+          <button class="fpill" onclick="setDate('90d',this)">90 days</button>
+          <button class="fpill" onclick="setDate('6m',this)">6 months</button>
+          <button class="fpill" onclick="setDate('12m',this)">12 months</button>
+        </div>
+      </div>
+      <div style="width:1px;height:24px;background:var(--pt-gray-200)"></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--pt-gray-500)">Category</span>
+        <select class="fsel" id="cat-f" onchange="applyF()">
+          <option value="all">All categories</option>
+          <option value="Engine">Engine &amp; Drivetrain</option>
+          <option value="Suspension">Suspension &amp; Steering</option>
+          <option value="Exhaust">Exhaust Systems</option>
+          <option value="Brakes">Brakes</option>
+          <option value="Electrical">Electrical &amp; Ignition</option>
+          <option value="Tools">Tools &amp; Shop</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--pt-gray-500)">Brand</span>
+        <select class="fsel" id="brand-f" onchange="applyF()">
+          <option value="all">All brands</option>
+          <option value="Edelbrock">Edelbrock</option>
+          <option value="K&N">K&amp;N</option>
+          <option value="MSD">MSD</option>
+          <option value="Holley">Holley</option>
+          <option value="Flowmaster">Flowmaster</option>
+          <option value="Bilstein">Bilstein</option>
+          <option value="StopTech">StopTech</option>
+          <option value="ARP">ARP</option>
+        </select>
+      </div>
+      <button class="btn btn-s btn-sm" id="reset-f" onclick="resetF()" style="display:none;margin-left:auto">✕ Reset filters</button>
+      <button class="btn btn-p btn-sm" onclick="showToast('Exec snapshot exported','📊')" style="margin-left:auto">📊 Export for Exec Review</button>
+    </div>
+  </div>
+
+  <div class="execsum mb20" id="exec-sum">
+    <div style="font-size:24px;flex-shrink:0;margin-top:2px">📋</div>
+    <div id="exec-sum-body"></div>
+  </div>
+
+  <div class="g3 mb24" id="scorecard-grid"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 340px;gap:16px;margin-bottom:20px">
+    <div class="card">
+      <div class="sec-hdr"><div class="sec-ttl">📈 Top Movers</div><span id="mv-lbl" style="font-size:11px;color:var(--pt-gray-400)"></span></div>
+      <div id="mv-list"></div>
+    </div>
+    <div class="card">
+      <div class="sec-hdr"><div class="sec-ttl">📉 Biggest Decliners</div><span id="dc-lbl" style="font-size:11px;color:var(--pt-gray-400)"></span></div>
+      <div id="dc-list"></div>
+    </div>
+    <div class="card" style="overflow-y:auto;max-height:340px">
+      <div class="sec-hdr"><div class="sec-ttl">🗓 Enrichment Milestones</div></div>
+      <div class="tl">
+        <div class="tl-item"><div class="tl-dot" style="background:var(--pt-green);box-shadow:0 0 0 2px #86efac"></div><div class="tl-date">Week 2 · Apr 2026</div><div class="tl-ttl">GSC &amp; GA4 integrations live</div><div class="tl-desc">Both signal feeds confirmed. Prioritization engine calibrated to JEGS catalog.</div><div class="tl-imp ti-up">✓ Milestone 1 complete</div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--pt-blue);box-shadow:0 0 0 2px #93c5fd"></div><div class="tl-date">Week 5 · May 2026</div><div class="tl-ttl">Platform live · Standards approved</div><div class="tl-desc">Enrichment standards in JEGS review. Priority SKU list to be confirmed.</div><div class="tl-imp ti-pend">⏳ Milestone 2 — in progress</div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--pt-gray-300);box-shadow:0 0 0 2px var(--pt-gray-200)"></div><div class="tl-date">Weeks 8–10 · Jun 2026</div><div class="tl-ttl">First 500 enriched SKUs delivered</div><div class="tl-desc">Top priority Engine &amp; Drivetrain SKUs per signal model. Flat file to JEGS PIM.</div><div class="tl-imp ti-pend">⏳ Milestone 3 — pending</div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--pt-yellow);box-shadow:0 0 0 2px #fcd34d"></div><div class="tl-date">Month 3+ · Jul 2026</div><div class="tl-ttl">Monthly operating cadence begins</div><div class="tl-desc">500 SKUs/month signal-ranked. Quarterly KPI review. Steering cadence set.</div><div class="tl-imp ti-pend">⏳ Ongoing retainer</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb20">
+    <div class="sec-hdr">
+      <div><div class="sec-ttl">Category Health Heatmap</div><div style="font-size:12px;color:var(--pt-gray-500)">Search · Find · Buy scores — one-glance exec view · GSC + GA4</div></div>
+      <div style="display:flex;gap:12px;align-items:center;font-size:11px;color:var(--pt-gray-500)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#dcfce7;display:inline-block"></span>≥75 Strong</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#fef3c7;display:inline-block"></span>50–74</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#fee2e2;display:inline-block"></span>&lt;50 Critical</span>
+      </div>
+    </div>
+    <div class="hm-grid" id="heatmap"></div>
+  </div>
+
+  <div class="card mb20">
+    <div class="sec-hdr">
+      <div><div class="card-ttl" id="drill-ttl">Category Performance</div><div class="card-sub" id="drill-sub">Click "View" on any category to drill in</div></div>
+      <div id="drill-bc"></div>
+    </div>
+    <div id="drill-wrap"></div>
+  </div>
+
+  <div class="g3 mb20">
+    <div class="card">
+      <div class="card-ttl" style="color:var(--pt-blue);margin-bottom:12px">🔍 Search Detail <span style="font-size:10px;background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:99px;font-weight:600;margin-left:4px">GSC</span></div>
+      <div class="sr2"><span class="sr-l">Total Impressions</span><span class="sr-v">4,218,000</span></div>
+      <div class="sr2"><span class="sr-l">Organic Clicks</span><span class="sr-v">198,400</span></div>
+      <div class="sr2"><span class="sr-l">Average CTR</span><span class="sr-v">4.7%</span></div>
+      <div class="sr2"><span class="sr-l">Zero-Result Searches</span><span class="sr-v" style="color:var(--pt-red)">22,600</span></div>
+      <div style="margin:12px 0 8px;font-size:11px;font-weight:600;color:var(--pt-gray-500);text-transform:uppercase;letter-spacing:.5px">Top Queries with CTR Gap</div>
+      <div class="sr2"><span class="sr-l">LS7 performance cam</span><span class="sr-v" style="font-size:11px">68,400 · 2.1%</span></div>
+      <div class="sr2"><span class="sr-l">cold air intake 5.0 mustang</span><span class="sr-v" style="font-size:11px">54,200 · 3.4%</span></div>
+      <div class="sr2"><span class="sr-l">coilover suspension kit</span><span class="sr-v" style="font-size:11px">41,800 · 2.9%</span></div>
+    </div>
+    <div class="card">
+      <div class="card-ttl" style="color:var(--pt-purple);margin-bottom:12px">🗂 Find Detail <span style="font-size:10px;background:#ede9fe;color:#5b21b6;padding:2px 6px;border-radius:99px;font-weight:600;margin-left:4px">GA4</span></div>
+      <div class="sr2"><span class="sr-l">Product Page Views</span><span class="sr-v">1,840,000</span></div>
+      <div class="sr2"><span class="sr-l">Avg Bounce Rate</span><span class="sr-v" style="color:var(--pt-red)">67%</span></div>
+      <div class="sr2"><span class="sr-l">Fitment Filter Usage</span><span class="sr-v">28%</span></div>
+      <div class="sr2"><span class="sr-l">Pages per Session</span><span class="sr-v">2.8</span></div>
+      <div style="margin:12px 0 8px;font-size:11px;font-weight:600;color:var(--pt-gray-500);text-transform:uppercase;letter-spacing:.5px">By Category</div>
+      <div class="sr2"><span class="sr-l">Exhaust Systems</span><span class="sr-v" style="font-size:11px;color:var(--pt-green)">Bounce 41%</span></div>
+      <div class="sr2"><span class="sr-l">Engine &amp; Drivetrain</span><span class="sr-v" style="font-size:11px;color:var(--pt-red)">Bounce 72%</span></div>
+      <div class="sr2"><span class="sr-l">Suspension &amp; Steering</span><span class="sr-v" style="font-size:11px;color:var(--pt-yellow)">Bounce 61%</span></div>
+    </div>
+    <div class="card">
+      <div class="card-ttl" style="color:var(--pt-green);margin-bottom:12px">🛒 Buy Detail <span style="font-size:10px;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:99px;font-weight:600;margin-left:4px">GA4</span></div>
+      <div class="sr2"><span class="sr-l">Add-to-Cart Rate</span><span class="sr-v">9.2%</span></div>
+      <div class="sr2"><span class="sr-l">Cart Abandonment Rate</span><span class="sr-v" style="color:var(--pt-red)">58%</span></div>
+      <div class="sr2"><span class="sr-l">Fitment Conflict Exits</span><span class="sr-v" style="color:var(--pt-red)">18,200/mo</span></div>
+      <div style="margin:12px 0 8px;font-size:11px;font-weight:600;color:var(--pt-gray-500);text-transform:uppercase;letter-spacing:.5px">Top Add-to-Cart</div>
+      <div class="sr2"><span class="sr-l">Exhaust Systems</span><span class="sr-v" style="font-size:11px;color:var(--pt-green)">ATC 17%</span></div>
+      <div class="sr2"><span class="sr-l">Brakes</span><span class="sr-v" style="font-size:11px;color:var(--pt-green)">ATC 14%</span></div>
+      <div class="sr2"><span class="sr-l">Engine &amp; Drivetrain</span><span class="sr-v" style="font-size:11px;color:var(--pt-red)">ATC 5%</span></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div style="font-size:20px;flex-shrink:0;margin-top:2px">💡</div>
+    <div class="ins-txt"><strong>Engine &amp; Drivetrain has the highest search volume but the lowest conversion rate.</strong> 68,400 monthly impressions on camshaft and carburetor queries — CTR is 2.1%, less than half the catalog average. On-site, 72% bounce and 5% add-to-cart signal missing fitment and specification data. Enriching the top 200 engine SKUs addresses the single largest revenue gap in the JEGS catalog.</div>
+  </div>
+</div>
+
+<!-- ═══════════ OPERATIONS ═══════════ -->
+<div id="tab-operations" class="tab">
+  <div class="card mb16">
+    <div class="sec-hdr">
+      <div class="sec-ttl">Enrichment Pipeline</div>
+      <span style="font-size:12px;color:var(--pt-gray-500)">5 phases · Beta Month 1 · 500 SKUs in production · click a phase for details</span>
+    </div>
+    <div class="pipe-wrap" id="pipe-wrap">
+      <div id="ph0" class="pipe-ph" style="border-radius:var(--r-lg) 0 0 var(--r-lg);background:#f1f5f9;border-color:#cbd5e1" onclick="selPhase(0)">
+        <div class="pipe-icon">📥</div><div class="pipe-lbl" style="color:#475569">Queue</div>
+        <div class="pipe-cnt" style="color:#334155">312</div><div class="pipe-sub" style="color:#94a3b8">signal-ranked</div>
+      </div>
+      <div class="pipe-arr"><div class="pipe-arr-inner"></div></div>
+      <div id="ph1" class="pipe-ph" style="background:#eff6ff;border-color:#93c5fd" onclick="selPhase(1)">
+        <div class="pipe-icon">⚙️</div><div class="pipe-lbl" style="color:#1e40af">Normalization</div>
+        <div class="pipe-cnt" style="color:#1e3a8a">88</div><div class="pipe-sub" style="color:#93c5fd">in progress</div>
+      </div>
+      <div class="pipe-arr"><div class="pipe-arr-inner"></div></div>
+      <div id="ph2" class="pipe-ph" style="background:#f5f3ff;border-color:#c4b5fd" onclick="selPhase(2)">
+        <div class="pipe-icon">✨</div><div class="pipe-lbl" style="color:#5b21b6">Enrichment</div>
+        <div class="pipe-cnt" style="color:#4c1d95">67</div><div class="pipe-sub" style="color:#c4b5fd">AI + specialist</div>
+      </div>
+      <div class="pipe-arr"><div class="pipe-arr-inner"></div></div>
+      <div id="ph3" class="pipe-ph" style="background:#fffbeb;border-color:#fcd34d" onclick="selPhase(3)">
+        <div class="pipe-icon">👁</div><div class="pipe-lbl" style="color:#92400e">Review</div>
+        <div class="pipe-cnt" style="color:#78350f">33</div><div class="pipe-sub" style="color:#fbbf24">JEGS approval</div>
+      </div>
+      <div class="pipe-arr"><div class="pipe-arr-inner"></div></div>
+      <div id="ph4" class="pipe-ph" style="border-radius:0 var(--r-lg) var(--r-lg) 0;background:#f0fdf4;border-color:#86efac" onclick="selPhase(4)">
+        <div class="pipe-icon">🟢</div><div class="pipe-lbl" style="color:#166534">Published</div>
+        <div class="pipe-cnt" style="color:#14532d">0</div><div class="pipe-sub" style="color:#86efac">first batch Jun '26</div>
+      </div>
+    </div>
+    <div id="phase-detail" style="display:none;margin-top:12px;border-radius:var(--r-md);padding:16px 20px;border:2px solid #ccc"></div>
+  </div>
+
+  <div class="card mb20">
+    <div class="sec-hdr">
+      <div class="sec-ttl">Catalog Coverage</div>
+      <span style="font-size:12px;color:var(--pt-gray-500)">Enrichment coverage by category · Beta Month 1 baseline</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div class="mc" style="border-left:3px solid var(--pt-teal)"><div class="mc-l">Total Active SKUs</div><div class="mc-v">1,040,000</div><div style="font-size:11px;color:var(--pt-gray-400);margin-top:2px">800+ brands</div></div>
+      <div class="mc" style="border-left:3px solid var(--pt-yellow)"><div class="mc-l">Enrichment Coverage</div><div class="mc-v">~12%</div><div style="font-size:11px;color:var(--pt-yellow);margin-top:2px">baseline — large upside</div></div>
+      <div class="mc" style="border-left:3px solid var(--pt-blue)"><div class="mc-l">In Active Pipeline</div><div class="mc-v">500</div><div style="font-size:11px;color:var(--pt-gray-400);margin-top:2px">Beta Month 1 batch</div></div>
+      <div class="mc" style="border-left:3px solid var(--pt-orange)"><div class="mc-l">Beta Throughput</div><div class="mc-v">500/mo</div><div style="font-size:11px;color:var(--pt-gray-400);margin-top:2px">signal-prioritized</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--pt-gray-700);margin-bottom:12px">Coverage by Category</div>
+        <table class="dt">
+          <thead><tr><th>Category</th><th>Total SKUs</th><th>In Pipeline</th><th>Coverage</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600">Engine &amp; Drivetrain</td><td>280,000</td><td style="color:var(--pt-orange);font-weight:600">180</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:var(--pt-gray-200);border-radius:99px;height:6px"><div style="width:11%;height:6px;border-radius:99px;background:var(--pt-red)"></div></div><span style="font-size:11px;font-weight:700;color:var(--pt-red);min-width:30px">11%</span></div></td><td class="td2">Critical</td></tr>
+            <tr><td style="font-weight:600">Suspension &amp; Steering</td><td>140,000</td><td style="color:var(--pt-orange);font-weight:600">120</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:var(--pt-gray-200);border-radius:99px;height:6px"><div style="width:15%;height:6px;border-radius:99px;background:var(--pt-yellow)"></div></div><span style="font-size:11px;font-weight:700;color:var(--pt-yellow);min-width:30px">15%</span></div></td><td class="tu">▲</td></tr>
+            <tr><td style="font-weight:600">Exhaust Systems</td><td>95,000</td><td style="color:var(--pt-yellow);font-weight:600">80</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:var(--pt-gray-200);border-radius:99px;height:6px"><div style="width:28%;height:6px;border-radius:99px;background:var(--pt-yellow)"></div></div><span style="font-size:11px;font-weight:700;color:var(--pt-yellow);min-width:30px">28%</span></div></td><td class="tf">►</td></tr>
+            <tr><td style="font-weight:600">Brakes</td><td>110,000</td><td style="color:var(--pt-yellow);font-weight:600">60</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:var(--pt-gray-200);border-radius:99px;height:6px"><div style="width:21%;height:6px;border-radius:99px;background:var(--pt-yellow)"></div></div><span style="font-size:11px;font-weight:700;color:var(--pt-yellow);min-width:30px">21%</span></div></td><td class="tf">►</td></tr>
+            <tr><td style="font-weight:600">Electrical &amp; Ignition</td><td>160,000</td><td style="color:var(--pt-gray-500);font-weight:600">40</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:var(--pt-gray-200);border-radius:99px;height:6px"><div style="width:9%;height:6px;border-radius:99px;background:var(--pt-green)"></div></div><span style="font-size:11px;font-weight:700;color:var(--pt-green);min-width:30px">9%</span></div></td><td class="tu">▲</td></tr>
+            <tr><td style="font-weight:600">Tools &amp; Shop</td><td>80,000</td><td style="color:var(--pt-gray-500);font-weight:600">20</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:var(--pt-gray-200);border-radius:99px;height:6px"><div style="width:6%;height:6px;border-radius:99px;background:var(--pt-green)"></div></div><span style="font-size:11px;font-weight:700;color:var(--pt-green);min-width:30px">6%</span></div></td><td class="tf">►</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--pt-gray-700);margin-bottom:12px">Recently Prioritized Brands</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px"><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--pt-orange);display:inline-block"></span><span style="font-weight:500">Edelbrock</span><span style="color:var(--pt-gray-400)">Engine · active production</span></div><span style="font-family:'DM Mono',monospace;color:var(--pt-orange);font-weight:600">62 in queue</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px"><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--pt-orange);display:inline-block"></span><span style="font-weight:500">K&amp;N</span><span style="color:var(--pt-gray-400)">Engine · active production</span></div><span style="font-family:'DM Mono',monospace;color:var(--pt-orange);font-weight:600">48 in queue</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px"><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--pt-yellow);display:inline-block"></span><span style="font-weight:500">Bilstein</span><span style="color:var(--pt-gray-400)">Suspension · queued</span></div><span style="font-family:'DM Mono',monospace;color:var(--pt-yellow);font-weight:600">71 pending</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px"><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--pt-yellow);display:inline-block"></span><span style="font-weight:500">Flowmaster</span><span style="color:var(--pt-gray-400)">Exhaust · queued</span></div><span style="font-family:'DM Mono',monospace;color:var(--pt-yellow);font-weight:600">38 pending</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 mb20">
+    <div class="card">
+      <div class="sec-hdr"><div class="sec-ttl">Enrichment Queue</div><button class="btn btn-p btn-sm" onclick="showToast('Queue report exported','📥')">↓ Export</button></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+        <div class="mc"><div class="mc-l">Signal-Ranked Queue</div><div class="mc-v">312</div></div>
+        <div class="mc"><div class="mc-l">In Active Production</div><div class="mc-v">155</div></div>
+        <div class="mc"><div class="mc-l">Awaiting JEGS Review</div><div class="mc-v" style="color:var(--pt-yellow)">33</div></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;color:var(--pt-gray-600)"><span>Month 1 Progress</span><span style="font-weight:600;color:var(--pt-navy)">188 / 500 SKUs</span></div>
+        <div class="pw"><div class="pb" style="width:37.6%;background:var(--pt-teal)"></div></div>
+        <div style="font-size:11px;color:var(--pt-gray-400);margin-top:4px">312 remaining · delivery target Jun 10, 2026</div>
+      </div>
+      <table class="dt"><thead><tr><th>SKU</th><th>Category</th><th>Signal Score</th><th>Status</th></tr></thead><tbody>
+        <tr><td><div style="font-weight:600;font-size:12px">Edelbrock #2101</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--pt-gray-400)">EDB-2101</div></td><td><span class="cb cb-eng">Engine</span></td><td><span class="sp sp-r">94</span></td><td style="color:var(--pt-yellow);font-size:11px;font-weight:600">In Progress</td></tr>
+        <tr><td><div style="font-weight:600;font-size:12px">K&amp;N Cold Air Intake</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--pt-gray-400)">KNN-57-2551</div></td><td><span class="cb cb-eng">Engine</span></td><td><span class="sp sp-r">91</span></td><td style="color:var(--pt-yellow);font-size:11px;font-weight:600">In Progress</td></tr>
+        <tr><td><div style="font-weight:600;font-size:12px">Bilstein B8 Shock</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--pt-gray-400)">BIL-24-196474</div></td><td><span class="cb cb-sus">Suspension</span></td><td><span class="sp sp-r">88</span></td><td style="color:var(--pt-gray-500);font-size:11px;font-weight:600">Queued</td></tr>
+        <tr><td><div style="font-weight:600;font-size:12px">MSD 6AL Ignition Box</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--pt-gray-400)">MSD-6425</div></td><td><span class="cb cb-elc">Electrical</span></td><td><span class="sp sp-y">82</span></td><td style="color:var(--pt-gray-500);font-size:11px;font-weight:600">Queued</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="sec-ttl" style="margin-bottom:14px">Category Scoring Baseline</div>
+      <table class="dt"><thead><tr><th>Category</th><th>Composite</th><th>Completeness</th><th>Standards</th><th>Web Perf.</th><th>Critical SKUs</th></tr></thead><tbody>
+        <tr><td style="font-weight:600">Exhaust Systems</td><td><span class="sp sp-g">74</span></td><td>78%</td><td>74%</td><td>71%</td><td style="color:var(--pt-green)">124</td></tr>
+        <tr><td style="font-weight:600">Brakes</td><td><span class="sp sp-y">66</span></td><td>69%</td><td>63%</td><td>67%</td><td style="color:var(--pt-yellow)">1,840</td></tr>
+        <tr><td style="font-weight:600">Electrical &amp; Ignition</td><td><span class="sp sp-y">62</span></td><td>65%</td><td>60%</td><td>61%</td><td style="color:var(--pt-yellow)">2,200</td></tr>
+        <tr><td style="font-weight:600">Suspension &amp; Steering</td><td><span class="sp sp-y">58</span></td><td>61%</td><td>55%</td><td>58%</td><td style="color:var(--pt-yellow)">2,800</td></tr>
+        <tr><td style="font-weight:600">Tools &amp; Shop</td><td><span class="sp sp-y">54</span></td><td>60%</td><td>51%</td><td>52%</td><td style="color:var(--pt-yellow)">1,100</td></tr>
+        <tr><td style="font-weight:600">Engine &amp; Drivetrain</td><td><span class="sp sp-r">38</span></td><td>39%</td><td>35%</td><td>41%</td><td style="color:var(--pt-red)">18,400</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="sec-hdr"><div class="sec-ttl">Priority Engine</div><span style="font-size:12px;color:var(--pt-gray-500)">Signal-ranked SKUs most likely to benefit from enrichment first</span></div>
+  <div class="g3">
+    <div class="card">
+      <div class="card-ttl" style="color:var(--pt-blue);margin-bottom:4px">🔍 Search Priorities</div>
+      <div class="card-sub" style="margin-bottom:12px">Worst search visibility · GSC</div>
+      <table class="dt"><thead><tr><th>Category / Brand</th><th>Score</th><th>Action</th></tr></thead><tbody>
+        <tr><td><div>Engine / Edelbrock</div><div class="pi">Missing CFM, jet size, fuel type</div></td><td><span class="sp sp-r">31</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Edelbrock Engine')">Add to Queue</button></td></tr>
+        <tr><td><div>Engine / K&amp;N</div><div class="pi">Missing fitment table, flow rate</div></td><td><span class="sp sp-r">34</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'K&amp;N Engine')">Add to Queue</button></td></tr>
+        <tr><td><div>Suspension / Generic</div><div class="pi">Missing spring rate, travel</div></td><td><span class="sp sp-r">41</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Suspension Generic')">Add to Queue</button></td></tr>
+        <tr><td><div>Engine / Holley</div><div class="pi">Missing EFI compatibility</div></td><td><span class="sp sp-r">43</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Holley Engine')">Add to Queue</button></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-ttl" style="color:var(--pt-purple);margin-bottom:4px">🗂 Find Priorities</div>
+      <div class="card-sub" style="margin-bottom:12px">Visible but can't be compared · GA4</div>
+      <table class="dt"><thead><tr><th>Category / Brand</th><th>Score</th><th>Action</th></tr></thead><tbody>
+        <tr><td><div>Engine / Camshafts</div><div class="pi">Missing lift, duration, LSA</div></td><td><span class="sp sp-r">33</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Camshafts')">Add to Queue</button></td></tr>
+        <tr><td><div>Suspension / Coilovers</div><div class="pi">Missing damping adjust specs</div></td><td><span class="sp sp-r">38</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Coilovers')">Add to Queue</button></td></tr>
+        <tr><td><div>Exhaust / Headers</div><div class="pi">Missing tube diameter, material</div></td><td><span class="sp sp-y">49</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Exhaust Headers')">Add to Queue</button></td></tr>
+        <tr><td><div>Brakes / Rotors</div><div class="pi">Missing fitment year/make/model</div></td><td><span class="sp sp-y">52</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Brake Rotors')">Add to Queue</button></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-ttl" style="color:var(--pt-green);margin-bottom:4px">🛒 Buy Priorities</div>
+      <div class="card-sub" style="margin-bottom:12px">Traffic + engagement, low conversion · GA4</div>
+      <table class="dt"><thead><tr><th>Category / Brand</th><th>Score</th><th>Action</th></tr></thead><tbody>
+        <tr><td><div>Engine / Intakes</div><div class="pi">Missing vehicle application list</div></td><td><span class="sp sp-r">36</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Engine Intakes')">Add to Queue</button></td></tr>
+        <tr><td><div>Suspension / Bilstein</div><div class="pi">Missing load rating, travel data</div></td><td><span class="sp sp-y">44</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Bilstein Suspension')">Add to Queue</button></td></tr>
+        <tr><td><div>Exhaust / Flowmaster</div><div class="pi">Missing dB rating, inlet/outlet</div></td><td><span class="sp sp-y">52</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'Flowmaster Exhaust')">Add to Queue</button></td></tr>
+        <tr><td><div>Brakes / StopTech</div><div class="pi">Missing pad compound specs</div></td><td><span class="sp sp-y">55</span></td><td><button class="btn btn-g btn-sm" onclick="addQ(this,'StopTech Brakes')">Add to Queue</button></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SALES & MARKETING ═══════════ -->
+<div id="tab-sales" class="tab">
+  <div class="card mb20">
+    <div class="sec-hdr"><div><div class="sec-ttl">🏆 Ready to Promote</div><div style="font-size:12px;color:var(--pt-gray-500)">Composite &gt;70 — sufficient quality to support paid or organic promotion</div></div><button class="btn btn-s btn-sm" onclick="showToast('List downloaded','📥')">📥 Download List</button></div>
+    <table class="dt"><thead><tr><th>Rank</th><th>Category / Brand</th><th>Composite</th><th>Search</th><th>Find</th><th>Buy</th><th>SKUs</th><th>Action</th></tr></thead><tbody>
+      <tr><td style="color:var(--pt-gray-400);font-weight:700">#1</td><td><div style="font-weight:600">Exhaust — Flowmaster</div><div style="font-size:11px;color:var(--pt-gray-500)">Super 44, American Thunder, Outlaw</div></td><td><span class="sp sp-g">78</span></td><td>82</td><td>76</td><td>74</td><td>2,800</td><td><button class="btn btn-p btn-sm" onclick="showToast('Campaign brief created','🚀')">Promote</button></td></tr>
+      <tr><td style="color:var(--pt-gray-400);font-weight:700">#2</td><td><div style="font-weight:600">Exhaust — Borla</div><div style="font-size:11px;color:var(--pt-gray-500)">Cat-Back, Axle-Back, Headers</div></td><td><span class="sp sp-g">76</span></td><td>79</td><td>74</td><td>74</td><td>1,900</td><td><button class="btn btn-p btn-sm" onclick="showToast('Campaign brief created','🚀')">Promote</button></td></tr>
+      <tr><td style="color:var(--pt-gray-400);font-weight:700">#3</td><td><div style="font-weight:600">Brakes — StopTech</div><div style="font-size:11px;color:var(--pt-gray-500)">Sport rotors, Big Brake kits</div></td><td><span class="sp sp-g">74</span></td><td>71</td><td>73</td><td>78</td><td>3,200</td><td><button class="btn btn-p btn-sm" onclick="showToast('Campaign brief created','🚀')">Promote</button></td></tr>
+      <tr><td style="color:var(--pt-gray-400);font-weight:700">#4</td><td><div style="font-weight:600">Brakes — Baer</div><div style="font-size:11px;color:var(--pt-gray-500)">Brake systems &amp; components</div></td><td><span class="sp sp-g">71</span></td><td>69</td><td>70</td><td>74</td><td>1,400</td><td><button class="btn btn-p btn-sm" onclick="showToast('Campaign brief created','🚀')">Promote</button></td></tr>
+    </tbody></table>
+  </div>
+  <div class="card mb20">
+    <div class="sec-hdr"><div><div class="sec-ttl">⚠️ Needs Enrichment Before Promotion</div><div style="font-size:12px;color:var(--pt-gray-500)">High search demand, low catalog quality — promoting now wastes ad spend</div></div></div>
+    <table class="dt"><thead><tr><th>Category / Brand</th><th>Demand Signal</th><th>Composite</th><th>Top Gap</th><th>Recommendation</th></tr></thead><tbody>
+      <tr><td><div style="font-weight:600">Engine / Edelbrock</div></td><td><span style="background:#dbeafe;color:#1e40af;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600">Very High</span></td><td><span class="sp sp-r">31</span></td><td>Vehicle fitment, CFM, fuel type</td><td style="color:var(--pt-orange);font-size:12px;font-weight:500">Enrich first</td></tr>
+      <tr><td><div style="font-weight:600">Engine / K&amp;N</div></td><td><span style="background:#dbeafe;color:#1e40af;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600">Very High</span></td><td><span class="sp sp-r">34</span></td><td>Year/make/model fitment table</td><td style="color:var(--pt-orange);font-size:12px;font-weight:500">Enrich first</td></tr>
+      <tr><td><div style="font-weight:600">Suspension / Bilstein</div></td><td><span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600">High</span></td><td><span class="sp sp-r">41</span></td><td>Application list, spring rate</td><td style="color:var(--pt-orange);font-size:12px;font-weight:500">Queue next</td></tr>
+      <tr><td><div style="font-weight:600">Engine / MSD</div></td><td><span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600">High</span></td><td><span class="sp sp-y">47</span></td><td>Install instructions, compatibility</td><td style="color:var(--pt-orange);font-size:12px;font-weight:500">Queue next</td></tr>
+    </tbody></table>
+  </div>
+  <div class="dlcard">
+    <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:16px;margin-bottom:8px;color:#fff">Download Reports</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:20px;line-height:1.6">Export promotion-ready SKUs with scores, or download the enrichment priority report for planning.</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-w" onclick="showToast('Promotion-Ready Report downloading...','📥')">📥 Download Promotion-Ready Report</button>
+      <button class="btn btn-ow" onclick="showToast('Enrichment Priority Report downloading...','📥')">📥 Download Enrichment Priority Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TOWER TALK (AGENTIC) ═══════════ -->
+<div id="tab-agentic" class="tab">
+  <div class="ag-wrap">
+    <div class="ag-side">
+      <div class="card" style="height:100%;overflow-y:auto">
+        <div class="slbl2">Suggested Queries</div>
+        <div class="sq" onclick="sendP('Which categories have the biggest gap between search volume and conversion?')">Which categories have the biggest gap between search volume and conversion?</div>
+        <div class="sq" onclick="sendP('Show me the top 10 underperforming sub-categories by composite score')">Show me the top 10 underperforming sub-categories by composite score</div>
+        <div class="sq" onclick="sendP('Which brand has the most incomplete fitment data?')">Which brand has the most incomplete fitment data?</div>
+        <div class="sq" onclick="sendP('How many SKUs are stuck in the normalization phase?')">How many SKUs are stuck in the normalization phase?</div>
+        <div class="sq" onclick="sendP('What are the top fitment conflict exit categories?')">What are the top fitment conflict exit categories?</div>
+        <div class="sq" onclick="sendP('Which engine SKUs have high impressions but low click-through?')">Which engine SKUs have high impressions but low click-through?</div>
+        <div class="sq" onclick="sendP('How many SKUs in the library match my Engine gaps?')">How many SKUs in the library match my Engine gaps?</div>
+        <div class="divider"></div>
+        <div style="font-size:11px;color:var(--pt-gray-400);line-height:1.6">Scoped to JEGS High Performance · GSC + GA4 signals only.</div>
+      </div>
+    </div>
+    <div class="ag-main">
+      <div class="chat-area" id="chat-area">
+        <div class="msg msg-a"><div class="ai-av">PT</div><div><div class="bub-a"><strong>Welcome to TowerTalk — JEGS High Performance</strong><br><br>I'm scoped to your 1,040,000+ SKUs across 6 categories. My signals are Google Search Console and Google Analytics 4. Ask me about scoring, pipeline status, fitment gaps, brand performance, or library matches.<br><br><span style="font-size:11px;color:var(--pt-gray-400)">eCommerce platform and PIM signals not yet available — scoped for a future phase.</span></div><div class="mtag">Pivotree TowerTalk v2.1 · JEGS Beta · GSC + GA4</div></div></div>
+      </div>
+      <div id="typing-ind" style="display:none;padding:10px 20px;background:var(--pt-gray-50);border-left:1px solid var(--pt-gray-200);border-right:1px solid var(--pt-gray-200)">
+        <div class="msg msg-a"><div class="ai-av">PT</div><div class="bub-a"><div class="typing"><span></span><span></span><span></span></div></div></div>
+      </div>
+      <div class="chat-bar">
+        <span style="font-size:16px;color:var(--pt-gray-400);cursor:pointer" onclick="showToast('CSV upload ready','📎')">📎</span>
+        <input class="chat-inp" id="chat-inp" placeholder="Ask about scores, fitment gaps, pipeline, or brand performance..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LIBRARY ═══════════ -->
+<div id="tab-library" class="tab">
+  <div class="sec-hdr mb20">
+    <div><div class="sec-ttl" style="font-size:20px">Pivotree Product Library</div><div style="font-size:13px;color:var(--pt-gray-500)">11,247,000+ enriched SKUs · Automotive aftermarket coverage includes ACES/PIES fitment, specs, install data</div></div>
+  </div>
+  <div style="margin-bottom:20px"><input class="lib-sb" placeholder="🔍  Search — try 'cold air intake', 'camshaft', 'coilover', 'ignition box'..." id="lib-inp" onkeydown="if(event.key==='Enter')libSearch()"></div>
+  <div class="lib-wrap">
+    <div class="lib-filt">
+      <div class="card">
+        <div class="filt-sec"><div class="filt-lbl">Category</div>
+          <label class="filt-opt"><input type="checkbox" checked> Engine &amp; Drivetrain</label>
+          <label class="filt-opt"><input type="checkbox" checked> Suspension &amp; Steering</label>
+          <label class="filt-opt"><input type="checkbox" checked> Exhaust Systems</label>
+          <label class="filt-opt"><input type="checkbox" checked> Brakes</label>
+          <label class="filt-opt"><input type="checkbox" checked> Electrical &amp; Ignition</label>
+          <label class="filt-opt"><input type="checkbox" checked> Tools &amp; Shop</label>
+        </div>
+        <div class="filt-sec"><div class="filt-lbl">Brand</div>
+          <label class="filt-opt"><input type="checkbox" checked> Edelbrock</label>
+          <label class="filt-opt"><input type="checkbox" checked> K&amp;N</label>
+          <label class="filt-opt"><input type="checkbox" checked> Holley</label>
+          <label class="filt-opt"><input type="checkbox" checked> Flowmaster</label>
+          <label class="filt-opt"><input type="checkbox" checked> Bilstein</label>
+          <label class="filt-opt"><input type="checkbox" checked> StopTech</label>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div class="pgrid" id="pgrid"></div>
+      <div class="divider"></div>
+      <div class="card">
+        <div class="sec-hdr"><div class="sec-ttl">Match Your Catalog</div><a href="#" style="font-size:12px;color:var(--pt-teal);text-decoration:none" onclick="showToast('Template downloaded','📄')">📄 Download Template</a></div>
+        <div id="match-up">
+          <div style="margin-bottom:14px"><label class="fl">Process Type</label><select class="fs"><option>SKU ID Match</option><option>ACES Fitment Refresh</option><option>New Product Introduction</option><option>Manufacturer Data Refresh</option></select></div>
+          <div class="ua" onclick="simMatch()"><div style="font-size:32px;margin-bottom:8px">📂</div><div style="font-weight:600;color:var(--pt-gray-700);margin-bottom:4px">Choose CSV or drag &amp; drop</div><div style="font-size:12px;color:var(--pt-gray-400)">Upload your SKU list to find library matches</div></div>
+        </div>
+        <div id="match-res" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="font-size:20px">✅</span><div><div style="font-weight:600;color:var(--pt-navy)">jegs_engine_drivetrain_skus.csv uploaded</div><div style="font-size:12px;color:var(--pt-gray-500)">Matching 1,500 SKUs against Pivotree Library...</div></div></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px">
+            <div style="padding:16px;border-radius:var(--r-md);background:var(--pt-green-light);text-align:center"><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;color:#166534">978</div><div style="font-size:11px;color:#166534;font-weight:600;margin-top:4px">Total 65.2%</div></div>
+            <div style="padding:16px;border-radius:var(--r-md);background:var(--pt-blue-light);text-align:center"><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;color:#1e40af">441</div><div style="font-size:11px;color:#1e40af;font-weight:600;margin-top:4px">Exact Match</div></div>
+            <div style="padding:16px;border-radius:var(--r-md);background:var(--pt-yellow-light);text-align:center"><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;color:#92400e">537</div><div style="font-size:11px;color:#92400e;font-weight:600;margin-top:4px">Partial</div></div>
+            <div style="padding:16px;border-radius:var(--r-md);background:var(--pt-red-light);text-align:center"><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;color:#991b1b">522</div><div style="font-size:11px;color:#991b1b;font-weight:600;margin-top:4px">No Match</div></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px">
+            <button class="btn btn-p" onclick="showToast('978 matches sent to queue','✅')">Send All Matches to Queue</button>
+            <button class="btn btn-s" onclick="document.getElementById('match-res').style.display='none';document.getElementById('match-up').style.display='block'">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PROGRAM STATUS ═══════════ -->
+<div id="tab-program" class="tab">
+  <div class="card mb20">
+    <div class="sec-hdr">
+      <div><div class="sec-ttl">Beta Program Milestones</div><div style="font-size:12px;color:var(--pt-gray-500)">6-month term · $3,250/month · 500 SKUs/month · Setup fee waived</div></div>
+      <span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r-md);padding:4px 10px;font-size:11px;font-weight:600;color:var(--pt-green)">● On Track</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div style="padding:16px;border-radius:var(--r-md);background:var(--pt-green-light);border:1px solid #86efac;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:700;color:#166534">Milestone 1</span><span style="font-size:10px;font-weight:700;background:#166534;color:#fff;padding:2px 8px;border-radius:99px">COMPLETE</span></div>
+        <div style="font-size:13px;font-weight:600;color:var(--pt-navy);margin-bottom:6px">GSC &amp; GA4 Integrations Live</div>
+        <div style="font-size:11px;color:var(--pt-gray-500)">Both feeds confirmed. Data ingestion tested. Prioritization engine calibrated. Week 2 of program.</div>
+      </div>
+      <div style="padding:16px;border-radius:var(--r-md);background:var(--pt-yellow-light);border:1px solid #fcd34d;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:700;color:#92400e">Milestone 2</span><span style="font-size:10px;font-weight:700;background:#92400e;color:#fff;padding:2px 8px;border-radius:99px">IN PROGRESS</span></div>
+        <div style="font-size:13px;font-weight:600;color:var(--pt-navy);margin-bottom:6px">Platform Live · Standards Approved</div>
+        <div style="font-size:11px;color:var(--pt-gray-500)">Enrichment standards doc in JEGS review. Priority SKU list to be confirmed. Target: end of Week 5.</div>
+      </div>
+      <div style="padding:16px;border-radius:var(--r-md);background:var(--pt-gray-100);border:1px solid var(--pt-gray-200);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:700;color:var(--pt-gray-500)">Milestone 3</span><span style="font-size:10px;font-weight:700;background:var(--pt-gray-400);color:#fff;padding:2px 8px;border-radius:99px">PENDING</span></div>
+        <div style="font-size:13px;font-weight:600;color:var(--pt-navy);margin-bottom:6px">First 500 Enriched SKUs Delivered</div>
+        <div style="font-size:11px;color:var(--pt-gray-500)">First production batch delivered &amp; imported to JEGS PIM. Target: Weeks 8–10 (Jun 2026).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 mb20">
+    <div class="card">
+      <div class="sec-hdr"><div class="sec-ttl">Integration Health</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--pt-green-light);border:1px solid #86efac;border-radius:var(--r-md)">
+          <div><div style="font-weight:600;font-size:13px;color:var(--pt-navy)">Google Search Console</div><div style="font-size:11px;color:var(--pt-gray-500);margin-top:2px">Property-level read access · JEGS.com verified · ingesting daily</div></div>
+          <div style="font-size:12px;font-weight:700;color:var(--pt-green)">● Live</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--pt-green-light);border:1px solid #86efac;border-radius:var(--r-md)">
+          <div><div style="font-weight:600;font-size:13px;color:var(--pt-navy)">Google Analytics 4</div><div style="font-size:11px;color:var(--pt-gray-500);margin-top:2px">Viewer access · ATC + checkout events confirmed at SKU level</div></div>
+          <div style="font-size:12px;font-weight:700;color:var(--pt-green)">● Live</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--pt-gray-100);border:1px solid var(--pt-gray-200);border-radius:var(--r-md);opacity:.65">
+          <div><div style="font-weight:600;font-size:13px;color:var(--pt-gray-500)">eCommerce Platform</div><div style="font-size:11px;color:var(--pt-gray-400);margin-top:2px">Scoped post JEGS platform launch · separate SOW / CO</div></div>
+          <div style="font-size:12px;font-weight:600;color:var(--pt-gray-400)">Coming Soon</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--pt-gray-100);border:1px solid var(--pt-gray-200);border-radius:var(--r-md);opacity:.65">
+          <div><div style="font-weight:600;font-size:13px;color:var(--pt-gray-500)">PIM Direct Delivery</div><div style="font-size:11px;color:var(--pt-gray-400);margin-top:2px">Flat file CSV delivery in use for beta · separate SOW / CO</div></div>
+          <div style="font-size:12px;font-weight:600;color:var(--pt-gray-400)">Coming Soon</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-hdr"><div class="sec-ttl">Governance Cadence</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:12px">
+        <div style="padding:10px 14px;border:1px solid var(--pt-gray-200);border-radius:var(--r-md)"><div style="font-weight:600;color:var(--pt-navy);margin-bottom:3px">Weekly Ops Check-In</div><div style="color:var(--pt-gray-500)">Every Thursday · Pivotree delivery + JEGS catalog team · pipeline status, blockers, approvals</div></div>
+        <div style="padding:10px 14px;border:1px solid var(--pt-gray-200);border-radius:var(--r-md)"><div style="font-weight:600;color:var(--pt-navy);margin-bottom:3px">Monthly Batch Delivery</div><div style="color:var(--pt-gray-500)">Delivery to JEGS: 10th of each month · JEGS approval deadline: 15th · PIM import by 20th</div></div>
+        <div style="padding:10px 14px;border:1px solid var(--pt-gray-200);border-radius:var(--r-md)"><div style="font-weight:600;color:var(--pt-navy);margin-bottom:3px">Quarterly Steering Review</div><div style="color:var(--pt-gray-500)">KPI review · Signal model recalibration · Throughput and scope discussion · expansion planning</div></div>
+        <div style="padding:10px 14px;border:1px solid var(--pt-teal);border-radius:var(--r-md);background:var(--pt-teal-light)"><div style="font-weight:600;color:var(--pt-teal-dark);margin-bottom:3px">🚩 Action Required</div><div style="color:var(--pt-teal-dark)">Enrichment standards doc — JEGS sign-off needed by May 15 to hit Milestone 2 on schedule.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 mb20">
+    <div class="card">
+      <div class="sec-hdr"><div class="sec-ttl">Program Team</div></div>
+      <table class="dt"><thead><tr><th>Role</th><th>Party</th><th>Responsibility</th></tr></thead><tbody>
+        <tr><td style="font-weight:600">Program Lead</td><td>Pivotree</td><td style="font-size:12px;color:var(--pt-gray-500)">Delivery oversight, steering review cadence, escalation</td></tr>
+        <tr><td style="font-weight:600">Delivery Team</td><td>Pivotree</td><td style="font-size:12px;color:var(--pt-gray-500)">Enrichment production, QA, weekly ops</td></tr>
+        <tr><td style="font-weight:600">Data Team</td><td>Pivotree</td><td style="font-size:12px;color:var(--pt-gray-500)">GSC + GA4 integrations, prioritization engine, signal refresh</td></tr>
+        <tr><td style="font-weight:600">Catalog Contact</td><td>JEGS</td><td style="font-size:12px;color:var(--pt-gray-500)">Primary ops contact, standards approval, PIM import</td></tr>
+        <tr><td style="font-weight:600">eCommerce Sponsor</td><td>JEGS</td><td style="font-size:12px;color:var(--pt-gray-500)">KPI alignment, quarterly steering, expansion decisions</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="sec-hdr"><div class="sec-ttl">Beta Scope Summary</div></div>
+      <div style="font-size:12px;color:var(--pt-gray-600);line-height:1.9">
+        <div style="display:flex;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--pt-gray-100)"><span style="color:var(--pt-green);font-weight:700;min-width:14px">✓</span><span><strong>500 SKUs/month</strong> enriched — signal-prioritized from GSC + GA4</span></div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--pt-gray-100)"><span style="color:var(--pt-green);font-weight:700;min-width:14px">✓</span><span><strong>Setup fee waived</strong> — GSC and GA4 integration at no charge</span></div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--pt-gray-100)"><span style="color:var(--pt-green);font-weight:700;min-width:14px">✓</span><span><strong>Flat file CSV delivery</strong> for JEGS PIM import</span></div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--pt-gray-100)"><span style="color:var(--pt-green);font-weight:700;min-width:14px">✓</span><span><strong>6-month term · $3,250/month</strong> · Starter tier</span></div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--pt-gray-100)"><span style="color:var(--pt-gray-400);min-width:14px">—</span><span style="color:var(--pt-gray-400)"><strong>eCommerce platform integration</strong> — post platform launch</span></div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--pt-gray-100)"><span style="color:var(--pt-gray-400);min-width:14px">—</span><span style="color:var(--pt-gray-400)"><strong>PIM direct push</strong> — post platform launch</span></div>
+        <div style="display:flex;gap:8px;padding-top:6px"><span style="color:var(--pt-gray-400);min-width:14px">—</span><span style="color:var(--pt-gray-400)"><strong>ACES/PIES normalization</strong> — separate SOW</span></div>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--pt-blue-light);border:1px solid #93c5fd;border-radius:var(--r-md);font-size:11px;color:#1e40af;font-weight:500">📌 Beta-to-standard conversion criteria and commercial tier terms to be defined by Month 4 steering review.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MODAL -->
+<div class="moverlay" id="modal">
+  <div class="modal">
+    <div id="modal-form">
+      <div class="modal-ttl">Add to Catalog</div>
+      <div class="modal-sub">Import a manufacturer file or SKU list to enter the signal-ranked queue.</div>
+      <label class="fl">Process Type</label>
+      <select class="fs"><option>New Product Introduction</option><option>Manufacturer Data Refresh</option><option>ACES Fitment Refresh</option><option>SKU ID Match</option></select>
+      <div style="margin-bottom:14px"><a href="#" style="font-size:12px;color:var(--pt-teal)" onclick="showToast('Template downloaded','📄')">📄 Download JEGS import template</a></div>
+      <label class="fl">Upload File</label>
+      <div class="ua" id="modal-ua" onclick="modalUp()" style="margin-bottom:14px"><div style="font-size:28px;margin-bottom:6px">📂</div><div style="font-weight:600;color:var(--pt-gray-700);font-size:13px">Choose CSV or drag &amp; drop</div></div>
+      <div id="modal-map" style="display:none;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--pt-gray-700);margin-bottom:8px">Column Mapping Preview</div>
+        <table class="dt" style="font-size:12px"><thead><tr><th>Your Column</th><th>Mapped To</th><th>Status</th></tr></thead><tbody>
+          <tr><td>part_number</td><td>SKU ID</td><td style="color:var(--pt-green)">✓ Matched</td></tr>
+          <tr><td>product_name</td><td>Product Title</td><td style="color:var(--pt-green)">✓ Matched</td></tr>
+          <tr><td>vehicle_fitment</td><td>ACES Fitment</td><td style="color:var(--pt-yellow)">⚠ Review</td></tr>
+        </tbody></table>
+      </div>
+      <div class="macts"><button class="btn btn-s" onclick="closeModal()">Cancel</button><button class="btn btn-p" onclick="modalSubmit()">Upload to Queue</button></div>
+    </div>
+    <div id="modal-suc" style="display:none">
+      <div class="msuc"><div style="font-size:48px;margin-bottom:12px">✅</div><div style="font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--pt-green);margin-bottom:8px">500 SKUs Added to Queue</div><div style="font-size:13px;color:var(--pt-gray-500);line-height:1.6">Items will begin processing in the Normalization phase.</div><div style="margin-top:20px;display:flex;justify-content:center;gap:10px"><button class="btn btn-p" onclick="closeModal();switchTab('operations',null)">View Pipeline</button><button class="btn btn-s" onclick="closeModal()">Done</button></div></div>
+    </div>
+  </div>
+</div>
+<div class="tc" id="tc"></div>
+
+<script>
+document.getElementById('ld').textContent=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  else document.querySelectorAll('.tbtn').forEach(b=>{if(b.dataset.tab===id)b.classList.add('active');});
+  if(id==='operations')setTimeout(()=>{},100);
+}
+function openLib(){switchTab('library',document.querySelector('[data-tab="library"]'));initLib();}
+function showToast(msg,icon='✅'){
+  const c=document.getElementById('tc'),t=document.createElement('div');
+  t.className='toast';t.innerHTML=`<span class="ti2">${icon}</span><span>${msg}</span>`;
+  c.appendChild(t);setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),350);},3000);
+}
+function addQ(btn,name){btn.className='btn btn-q btn-sm';btn.textContent='✓ Queued';btn.disabled=true;showToast(name+' added to queue','✅');}
+
+let muploaded=false;
+function openModal(){document.getElementById('modal').classList.add('open');document.getElementById('modal-form').style.display='block';document.getElementById('modal-suc').style.display='none';document.getElementById('modal-map').style.display='none';muploaded=false;}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+function modalUp(){if(!muploaded){muploaded=true;document.getElementById('modal-ua').innerHTML='<div style="font-size:20px">✅</div><div style="font-weight:600;color:var(--pt-green);font-size:13px;margin-top:4px">jegs_engine_skus.csv</div>';document.getElementById('modal-map').style.display='block';}}
+function modalSubmit(){if(!muploaded){showToast('Please select a file first','⚠️');return;}document.getElementById('modal-form').style.display='none';document.getElementById('modal-suc').style.display='block';showToast('500 SKUs added to queue','✅');}
+
+// ═══ SCORECARD DATA ═══
+const profiles={
+  all:{search:{score:49,delta:null,trend:[44,45,46,47,48,48,49,49]},find:{score:44,delta:null,trend:[40,41,41,42,42,43,44,44]},buy:{score:41,delta:null,trend:[38,38,39,39,40,40,41,41]}},
+  Engine:{search:{score:39,delta:null,trend:[36,37,37,38,38,38,39,39]},find:{score:35,delta:null,trend:[32,33,33,34,34,35,35,35]},buy:{score:41,delta:null,trend:[38,39,39,40,40,41,41,41]}},
+  Suspension:{search:{score:61,delta:null,trend:[56,57,58,59,59,60,60,61]},find:{score:55,delta:null,trend:[50,51,52,53,54,54,55,55]},buy:{score:58,delta:null,trend:[54,55,55,56,57,57,58,58]}},
+  Exhaust:{search:{score:78,delta:null,trend:[71,72,73,75,76,77,77,78]},find:{score:74,delta:null,trend:[68,70,71,72,72,73,74,74]},buy:{score:71,delta:null,trend:[65,66,67,68,69,70,71,71]}},
+  Brakes:{search:{score:69,delta:null,trend:[63,64,65,66,67,67,68,69]},find:{score:63,delta:null,trend:[58,59,60,60,61,62,62,63]},buy:{score:67,delta:null,trend:[62,63,63,64,65,66,66,67]}},
+  Electrical:{search:{score:65,delta:null,trend:[59,60,61,62,63,63,64,65]},find:{score:60,delta:null,trend:[55,56,57,57,58,59,60,60]},buy:{score:61,delta:null,trend:[56,57,57,58,59,60,60,61]}},
+  Tools:{search:{score:60,delta:null,trend:[55,56,57,57,58,59,59,60]},find:{score:51,delta:null,trend:[47,47,48,49,49,50,50,51]},buy:{score:52,delta:null,trend:[48,48,49,50,50,51,51,52]}},
+  Edelbrock:{search:{score:31,delta:null,trend:[28,28,29,29,30,30,30,31]},find:{score:28,delta:null,trend:[25,26,26,27,27,27,28,28]},buy:{score:33,delta:null,trend:[30,30,31,31,32,32,33,33]}},
+  'K&N':{search:{score:34,delta:null,trend:[31,31,32,32,33,33,33,34]},find:{score:31,delta:null,trend:[28,29,29,30,30,30,31,31]},buy:{score:36,delta:null,trend:[33,33,34,34,35,35,36,36]}},
+  Holley:{search:{score:43,delta:null,trend:[39,40,40,41,41,42,42,43]},find:{score:40,delta:null,trend:[37,37,38,38,39,39,39,40]},buy:{score:45,delta:null,trend:[41,42,42,43,43,44,44,45]}},
+  Flowmaster:{search:{score:78,delta:null,trend:[71,72,74,75,75,76,77,78]},find:{score:74,delta:null,trend:[68,69,70,71,72,73,73,74]},buy:{score:72,delta:null,trend:[66,67,68,69,70,70,71,72]}},
+  Bilstein:{search:{score:44,delta:null,trend:[40,41,41,42,42,43,43,44]},find:{score:40,delta:null,trend:[37,37,38,38,39,39,40,40]},buy:{score:46,delta:null,trend:[42,42,43,43,44,45,45,46]}},
+  StopTech:{search:{score:72,delta:null,trend:[65,67,68,69,70,70,71,72]},find:{score:69,delta:null,trend:[63,64,65,66,67,67,68,69]},buy:{score:74,delta:null,trend:[68,69,70,71,71,72,73,74]}},
+  ARP:{search:{score:58,delta:null,trend:[53,54,54,55,56,56,57,58]},find:{score:54,delta:null,trend:[50,50,51,51,52,53,53,54]},buy:{score:61,delta:null,trend:[56,57,57,58,59,59,60,61]}},
+};
+const hmData=[
+  {cat:'Engine & Drivetrain',s:39,f:35,b:41},
+  {cat:'Suspension & Steering',s:61,f:55,b:58},
+  {cat:'Exhaust Systems',s:78,f:74,b:71},
+  {cat:'Brakes',s:69,f:63,b:67},
+  {cat:'Electrical & Ignition',s:65,f:60,b:61},
+  {cat:'Tools & Shop',s:60,f:51,b:52},
+];
+function cellStyle(v){if(v>=75)return'background:#dcfce7;color:#166534';if(v>=50)return'background:#fef3c7;color:#92400e';return'background:#fee2e2;color:#991b1b';}
+
+let activeDate='30d',activeKey='all';
+function setDate(v,btn){activeDate=v;document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');applyF();}
+function applyF(){
+  const cat=document.getElementById('cat-f').value,brand=document.getElementById('brand-f').value;
+  activeKey=brand!=='all'?brand:cat!=='all'?cat:'all';
+  const filt=activeKey!=='all';
+  document.getElementById('reset-f').style.display=filt?'inline-flex':'none';
+  document.getElementById('cat-f').className='fsel'+(cat!=='all'?' af':'');
+  document.getElementById('brand-f').className='fsel'+(brand!=='all'?' af':'');
+  const p=profiles[activeKey]||profiles.all;
+  renderScorecards(p);renderExec(p,activeKey,filt);renderMovers();renderHeatmap();
+}
+function resetF(){document.getElementById('cat-f').value='all';document.getElementById('brand-f').value='all';document.getElementById('reset-f').style.display='none';activeKey='all';document.querySelectorAll('.fsel').forEach(s=>s.className='fsel');applyF();}
+
+function scBg(s){return s>=75?'sbg-g':s>=50?'sbg-y':'sbg-r';}
+function scNum(s){return s>=75?'sg':s>=50?'sy':'sr';}
+function scColor(s){return s>=75?'#16a34a':s>=50?'#d97706':'#dc2626';}
+function scTrack(s){return s>=75?'#86efac':s>=50?'#fcd34d':'#fca5a5';}
+const cardMeta=[
+  {label:'Search Visibility',src:'Google Search Console',key:'search'},
+  {label:'Findability Score',src:'GA4 on-site data',key:'find'},
+  {label:'Conversion Score',src:'GA4 conversion data',key:'buy'},
+];
+function renderScorecards(p){
+  document.getElementById('scorecard-grid').innerHTML=cardMeta.map(m=>{
+    const d=p[m.key],dash=Math.round(314*(1-d.score/100));
+    const deltaHtml=d.delta!=null?(d.delta>0?`<span class="sdelta dup">▲ +${Math.abs(d.delta).toFixed(1)}%</span>`:`<span class="sdelta ddn">▼ −${Math.abs(d.delta).toFixed(1)}%</span>`):'<span class="sdelta dfl">► Baseline</span>';
+    return`<div class="card scard ${scBg(d.score)}"><svg class="sring" width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="${scTrack(d.score)}" stroke-width="18"/><circle cx="60" cy="60" r="50" fill="none" stroke="${scColor(d.score)}" stroke-width="18" stroke-dasharray="314" stroke-dashoffset="${dash}" stroke-linecap="round" transform="rotate(-90 60 60)"/></svg><div class="slbl">${m.label}</div>${deltaHtml}<div class="snum ${scNum(d.score)}">${d.score}</div><div style="font-size:11px;color:var(--pt-gray-500);margin:2px 0 8px">/ 100</div><div style="font-size:10px;color:var(--pt-gray-400)">${m.src}</div></div>`;
+  }).join('');
+}
+function renderExec(p,key,filt){
+  const comp=Math.round((p.search.score+p.find.score+p.buy.score)/3);
+  const scope=filt&&key!=='all'?key:'JEGS full catalog';
+  const crit=comp<50?`<span class="hl-r">Critical attention needed</span> — composite below 50. Engine &amp; Drivetrain is the priority.`:`<span class="hl-y">Enrichment in progress</span> — Beta Month 1.`;
+  document.getElementById('exec-sum-body').innerHTML=`<div class="es-ttl">Executive Summary · ${scope}</div><div class="es-txt">Composite catalog signal score: <strong>${comp}/100</strong> (Search ${p.search.score} · Find ${p.find.score} · Buy ${p.buy.score}). ${crit} First 500 SKUs in active production; delivery target <span class="hl-g">Jun 10, 2026</span>. GSC and GA4 signals live and calibrated.</div>`;
+}
+function renderMovers(){
+  const lbl='30-day signal change';
+  document.getElementById('mv-lbl').textContent=lbl;
+  document.getElementById('dc-lbl').textContent=lbl;
+  const up=[{name:'Exhaust Systems',sub:'Flowmaster + Borla coverage improving',val:'+7.2'},{name:'Brakes',sub:'StopTech fitment data refreshed',val:'+5.1'},{name:'Electrical / MSD',sub:'Ignition box specs updated',val:'+4.4'}];
+  const dn=[{name:'Engine & Drivetrain',sub:'Fitment gap widening vs. search demand',val:'-8.1'},{name:'Suspension / Generic',sub:'Missing spring rate & travel data',val:'-4.7'},{name:'Tools / Shop Lifts',sub:'Incomplete weight capacity specs',val:'-2.9'}];
+  document.getElementById('mv-list').innerHTML=up.map(m=>`<div class="mv-row"><div class="mv-name">${m.name}<div class="mv-sub">${m.sub}</div></div><div class="mv-up">▲ ${m.val}</div></div>`).join('');
+  document.getElementById('dc-list').innerHTML=dn.map(m=>`<div class="mv-row"><div class="mv-name">${m.name}<div class="mv-sub">${m.sub}</div></div><div class="mv-dn">▼ ${m.val}</div></div>`).join('');
+}
+function renderHeatmap(){
+  const hm=document.getElementById('heatmap');
+  hm.innerHTML=`<div class="hm-hdr"></div><div class="hm-hdr">🔍 Search (GSC)</div><div class="hm-hdr">🗂 Find (GA4)</div><div class="hm-hdr">🛒 Buy (GA4)</div>`+
+  hmData.map(r=>`<div class="hm-lbl">${r.cat}</div><div class="hm-cell" style="${cellStyle(r.s)}">${r.s}</div><div class="hm-cell" style="${cellStyle(r.f)}">${r.f}</div><div class="hm-cell" style="${cellStyle(r.b)}">${r.b}</div>`).join('');
+}
+
+// Drill-down
+const catD=[
+  {name:'Engine & Drivetrain',score:38,search:39,find:35,buy:41,skus:'280,000',trend:'▼',tc:'td2'},
+  {name:'Suspension & Steering',score:58,search:61,find:55,buy:58,skus:'140,000',trend:'►',tc:'tf'},
+  {name:'Exhaust Systems',score:74,search:78,find:74,buy:71,skus:'95,000',trend:'▲',tc:'tu'},
+  {name:'Brakes',score:66,search:69,find:63,buy:67,skus:'110,000',trend:'►',tc:'tf'},
+  {name:'Electrical & Ignition',score:62,search:65,find:60,buy:61,skus:'160,000',trend:'▲',tc:'tu'},
+  {name:'Tools & Shop',score:54,search:60,find:51,buy:52,skus:'80,000',trend:'►',tc:'tf'},
+];
+const subD={
+  'Engine & Drivetrain':[
+    {name:'Carburetors',score:31,search:28,find:32,buy:33,skus:'8,400',trend:'▼',tc:'td2'},
+    {name:'Cold Air Intakes',score:34,search:36,find:31,buy:34,skus:'12,200',trend:'▼',tc:'td2'},
+    {name:'Camshafts & Valvetrain',score:33,search:35,find:30,buy:33,skus:'18,600',trend:'▼',tc:'td2'},
+    {name:'Fuel Systems & EFI',score:47,search:49,find:44,buy:48,skus:'22,100',trend:'►',tc:'tf'},
+    {name:'Engine Internals',score:41,search:43,find:38,buy:42,skus:'34,000',trend:'►',tc:'tf'},
+    {name:'Superchargers & Turbos',score:38,search:40,find:35,buy:38,skus:'9,800',trend:'▼',tc:'td2'},
+  ],
+  'Exhaust Systems':[
+    {name:'Cat-Back Systems',score:78,search:82,find:76,buy:74,skus:'14,200',trend:'▲',tc:'tu'},
+    {name:'Mufflers',score:74,search:77,find:72,buy:72,skus:'18,400',trend:'▲',tc:'tu'},
+    {name:'Headers',score:62,search:66,find:59,buy:61,skus:'12,800',trend:'►',tc:'tf'},
+    {name:'Exhaust Tips',score:69,search:71,find:68,buy:68,skus:'8,600',trend:'▲',tc:'tu'},
+  ],
+};
+const skuD={'Carburetors':[
+  {sku:'EDB-1406',name:'Performer Series 650 CFM Carb',score:33,search:30,find:34,buy:36,brand:'Edelbrock'},
+  {sku:'EDB-1411',name:'Performer Series 750 CFM Carb',score:29,search:26,find:30,buy:32,brand:'Edelbrock'},
+  {sku:'HOL-0-80508S',name:'Street HP 750 CFM Carb',score:38,search:35,find:39,buy:40,brand:'Holley'},
+  {sku:'HOL-0-1850S',name:'Model 4160 600 CFM Carb',score:31,search:28,find:32,buy:33,brand:'Holley'},
+]};
+let dLevel='cat',dCat=null,dSub=null;
+function spCls(s){return s>=75?'sp-g':s>=50?'sp-y':'sp-r';}
+function renderDrill(data,level){
+  const isSku=level==='sku';
+  let h='<table class="dt"><thead><tr>';
+  if(isSku)h+='<th>SKU</th><th>Product</th><th>Brand</th><th>Composite</th><th>Search</th><th>Find</th><th>Buy</th>';
+  else h+='<th>'+(level==='cat'?'Category':'Sub-category')+'</th><th>Composite</th><th>Search</th><th>Find</th><th>Buy</th><th>SKUs</th><th>Trend</th><th>Action</th>';
+  h+='</tr></thead><tbody>';
+  data.forEach(r=>{
+    if(isSku){h+=`<tr><td style="font-family:'DM Mono',monospace;font-size:11px">${r.sku}</td><td style="font-weight:500">${r.name}</td><td style="font-size:12px;color:var(--pt-gray-500)">${r.brand}</td><td><span class="sp ${spCls(r.score)}">${r.score}</span></td><td>${r.search}</td><td>${r.find}</td><td>${r.buy}</td></tr>`;}
+    else{const cl=level==='cat'?`onclick="dCat='${r.name}';drillSub('${r.name}')"`:`onclick="dSub='${r.name}';drillSku('${r.name}')"`;h+=`<tr><td style="font-weight:600;cursor:pointer;color:var(--pt-navy)" ${cl}>${r.name}</td><td><span class="sp ${spCls(r.score)}">${r.score}</span></td><td>${r.search}</td><td>${r.find}</td><td>${r.buy}</td><td style="font-family:'DM Mono',monospace;font-size:11px">${r.skus}</td><td class="${r.tc}">${r.trend}</td><td><button class="btn btn-g btn-sm" ${cl}>View</button></td></tr>`;}
+  });
+  h+='</tbody></table>';document.getElementById('drill-wrap').innerHTML=h;
+}
+function renderBC(){
+  const bc=document.getElementById('drill-bc');if(dLevel==='cat'){bc.innerHTML='';return;}
+  let h=`<div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--pt-blue-light);border-radius:var(--r-md);font-size:12px"><span style="color:var(--pt-blue);cursor:pointer;font-weight:500" onclick="resetDrill()">All Categories</span>`;
+  if(dLevel==='sub'||dLevel==='sku')h+=`<span style="color:var(--pt-gray-400)">›</span><span style="${dLevel==='sub'?'color:var(--pt-gray-700);font-weight:600':'color:var(--pt-blue);cursor:pointer;font-weight:500'}" onclick="drillSub('${dCat}')">${dCat}</span>`;
+  if(dLevel==='sku')h+=`<span style="color:var(--pt-gray-400)">›</span><span style="color:var(--pt-gray-700);font-weight:600">${dSub}</span>`;
+  bc.innerHTML=h+'</div>';
+}
+function resetDrill(){dLevel='cat';dCat=null;dSub=null;document.getElementById('drill-ttl').textContent='Category Performance';document.getElementById('drill-sub').textContent='Click "View" on any category to drill in';renderDrill(catD,'cat');renderBC();}
+function drillSub(cat){dLevel='sub';dCat=cat;dSub=null;document.getElementById('drill-ttl').textContent=cat+' — Sub-categories';document.getElementById('drill-sub').textContent='Click "View" to see SKU-level data';renderDrill(subD[cat]||[],'sub');renderBC();}
+function drillSku(sub){dLevel='sku';dSub=sub;document.getElementById('drill-ttl').textContent=sub+' — SKU Level';document.getElementById('drill-sub').textContent='Individual SKU scores';renderDrill(skuD[sub]||[],'sku');renderBC();}
+
+// Pipeline
+const phaseInfo=[
+  {color:'#64748b',bg:'#e2e8f0',border:'#475569',cats:[{n:'Engine',v:180},{n:'Suspension',v:120},{n:'Exhaust',v:80},{n:'Brakes',v:60}],desc:'SKUs signal-ranked by GSC + GA4 model. Engine & Drivetrain has highest priority based on revenue gap.',brand:'Edelbrock (62 SKUs)',eta:'Processing begins within 24h',avgScore:89,action:'SKUs sorted by signal priority. Top engine SKUs enter Normalization within 24 hours.'},
+  {color:'#1e40af',bg:'#dbeafe',border:'#3b82f6',cats:[{n:'Engine',v:50},{n:'Suspension',v:24},{n:'Exhaust',v:10},{n:'Brakes',v:4}],desc:'Raw supplier data being standardized — units, naming, fitment table structure aligned to ACES.',brand:'Edelbrock (50 SKUs)',eta:'Avg 2.4 days per batch',avgScore:71,action:'Normalization resolves inconsistent field formats, unit mismatches, and ACES fitment structure before enrichment.'},
+  {color:'#5b21b6',bg:'#ede9fe',border:'#7c3aed',cats:[{n:'Engine',v:40},{n:'Suspension',v:15},{n:'Exhaust',v:8},{n:'Brakes',v:4}],desc:'Missing attributes being sourced and applied — vehicle fitment, specs, install notes, images.',brand:'K&N (30 SKUs)',eta:'Avg 3.1 days per batch',avgScore:68,action:'AI-assisted enrichment pulls from Pivotree Library and verified manufacturer data. ACES fitment tables built.'},
+  {color:'#92400e',bg:'#fef3c7',border:'#d97706',cats:[{n:'Engine',v:20},{n:'Suspension',v:8},{n:'Exhaust',v:5},{n:'Brakes',v:0}],desc:'Enriched SKUs awaiting JEGS catalog team sign-off. Deadline: 15th of each month.',brand:'Edelbrock (20 SKUs)',eta:'Avg 1.8 days turnaround',avgScore:82,action:'Approve batches to push to Published. Rejected items return to Enrichment phase.'},
+  {color:'#166534',bg:'#dcfce7',border:'#16a34a',cats:[{n:'Engine',v:0},{n:'Suspension',v:0},{n:'Exhaust',v:0},{n:'Brakes',v:0}],desc:'First batch target: Jun 10, 2026. Delivery as CSV flat file for JEGS PIM import.',brand:'First batch Jun 2026',eta:'Delivery date: Jun 10, 2026',avgScore:0,action:'Published SKUs imported to JEGS PIM. GSC will index within 48–72h of publish. GA4 tracking active immediately.'},
+];
+const phNames=['Queue','Normalization','Enrichment','Review','Published'];
+const phCounts=[312,88,67,33,0];
+let selPhaseIdx=null;
+function selPhase(i){
+  const det=document.getElementById('phase-detail');
+  [0,1,2,3,4].forEach(j=>{
+    const el=document.getElementById('ph'+j);
+    el.style.boxShadow='none';el.style.opacity='1';
+    el.style.borderWidth='2px';
+    el.style.borderColor=j===0?'#cbd5e1':j===1?'#93c5fd':j===2?'#c4b5fd':j===3?'#fcd34d':'#86efac';
+  });
+  if(selPhaseIdx===i){selPhaseIdx=null;det.style.display='none';return;}
+  selPhaseIdx=i;
+  const el=document.getElementById('ph'+i),info=phaseInfo[i];
+  el.style.borderColor=info.border;el.style.borderWidth='3px';el.style.boxShadow=`0 2px 10px ${info.color}40`;
+  const bars=info.cats.map(c=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:11px;color:var(--pt-gray-600);width:80px;flex-shrink:0">${c.n}</span><div style="flex:1;background:rgba(0,0,0,.1);border-radius:99px;height:6px"><div style="width:${phCounts[i]>0?Math.round(c.v/phCounts[i]*100):0}%;height:6px;border-radius:99px;background:${info.color}"></div></div><span style="font-size:11px;font-family:'DM Mono',monospace;color:${info.color};font-weight:600;min-width:28px">${c.v}</span></div>`).join('');
+  det.style.display='block';det.style.background=info.bg;det.style.borderColor=info.border;
+  det.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px"><div><div style="font-size:11px;font-weight:700;color:${info.color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${phNames[i]} — ${phCounts[i]} items</div><div style="font-size:12px;color:var(--pt-gray-600);line-height:1.6;margin-bottom:10px">${info.desc}</div><div style="font-size:11px;color:var(--pt-gray-500)"><strong style="color:var(--pt-gray-700)">Top brand:</strong> ${info.brand}</div><div style="font-size:11px;color:var(--pt-gray-500);margin-top:4px"><strong style="color:var(--pt-gray-700)">Timeline:</strong> ${info.eta}</div>${info.avgScore>0?`<div style="font-size:11px;color:var(--pt-gray-500);margin-top:4px"><strong style="color:var(--pt-gray-700)">Avg signal score:</strong> ${info.avgScore}/100</div>`:''}</div><div><div style="font-size:11px;font-weight:700;color:${info.color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">By Category</div>${bars}</div><div><div style="font-size:11px;font-weight:700;color:${info.color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">What Happens Here</div><div style="font-size:12px;color:var(--pt-gray-600);line-height:1.6">${info.action}</div>${i<4?`<button class="btn btn-sm" style="margin-top:12px;background:${info.color};color:#fff;border:none" onclick="showToast('${phNames[i]} batch actioned','✅')">Action ${phNames[i]} Batch</button>`:''}</div></div>`;
+}
+
+// Agentic
+const responses={
+  'gap between search volume and conversion':`<strong>Search-to-Conversion Gap — JEGS</strong><div class="mono"><span class="mh">CATEGORY              SEARCH  BUY   GAP</span><br><span class="mw">Engine & Drivetrain   39      41    -12 ← widest</span><br><span class="mw">Suspension & Steering 61      58    -3</span><br>Brakes                69      67    -2<br>Electrical & Ignition 65      61    -4<br><span class="mh">Exhaust Systems       78      71    +7  ← converting</span></div><br>Engine has 68K+ monthly impressions, 2.1% CTR, 5% ATC. Primary cause: missing fitment and spec data.`,
+  'underperforming sub':`<strong>Top Underperforming Subcategories</strong><div class="mono"><span class="mh">RANK  SUBCATEGORY              SCORE</span><br><span class="mw">1     Carburetors              31</span><br><span class="mw">2     Camshafts & Valvetrain   33</span><br><span class="mw">3     Cold Air Intakes         34</span><br><span class="mw">4     Coilover Kits            38</span><br><span class="mw">5     Superchargers/Turbos     38</span><br>6     Engine Internals         41<br>7     Shock Absorbers          44<br>8     Ignition Boxes           48<br>9     Suspension — Generic     41<br><span class="mh">10    Headers                  52</span></div>`,
+  'fitment':`<strong>Brands with Most Incomplete Fitment Data</strong><div class="mono"><span class="mh">BRAND       CAT      FITMENT COMPLETE</span><br><span class="mw">Edelbrock   Engine   28%  ← lowest</span><br>K&N         Engine   34%<br>Holley      Engine   37%<br>Bilstein    Susp.    42%<br>MSD         Elec.    51%<br><span class="mh">Primary gap: Year/Make/Model application tables</span></div>`,
+  'normalization':`<strong>Pipeline Status — JEGS Beta Month 1</strong><div class="mono"><span class="mh">PHASE          COUNT</span><br>Queue          312<br><span class="mw">Normalization  88  ← current</span><br>Enrichment     67<br>Review         33  ← approval due 15th<br>Published      0   first batch Jun 10<br><span class="mh">Total in pipeline: 500 (Month 1 batch)</span></div>`,
+  'conflict':`<strong>Fitment Conflict Exit Analysis — GA4</strong><div class="mono"><span class="mh">CATEGORY       EXITS/MO   % OF VIEWS</span><br><span class="mw">Engine         9,400      8.1%</span><br><span class="mw">Suspension     5,200      6.3%</span><br>Brakes         2,800      4.1%<br>Electrical     1,600      3.2%<br>Exhaust        1,200      2.8%<br><span class="mh">Total: 18,200 exits/month from fitment issues</span></div>`,
+  'impressions':`<strong>High Impression / Low CTR — Engine (GSC)</strong><div class="mono"><span class="mh">QUERY                    IMPR    CTR</span><br><span class="mw">LS7 performance cam      68,400  2.1%</span><br><span class="mw">Edelbrock carburetor      61,200  2.6%</span><br><span class="mw">cold air intake 5.0       54,200  3.4%</span><br>performance headers       47,800  4.1%<br>K&N air intake kit        44,100  3.8%<br><span class="mh">Catalog avg CTR: 4.7% — all engine well below avg</span></div>`,
+  'library':`<strong>Library Match — Engine & Drivetrain</strong><div class="mono"><span class="mh">ENGINE SKUs:     280,000 total</span><br>Composite:       38/100<br>Below 50:        18,400<br>Library est.:    ~6,100 matches<br>Exact ready:     ~2,800<br>ACES fitment:    ~3,300 partial<br><span class="mw">Priority: Edelbrock, K&N, Holley</span></div>`,
+};
+function getResp(t){const tl=t.toLowerCase();for(const[k,v]of Object.entries(responses)){if(k.split(' ').filter(w=>w.length>3).some(w=>tl.includes(w)))return v;}return`<strong>Query processed.</strong><br><br><div class="mono"><span class="mh">JEGS CATALOG SUMMARY</span><br>Total SKUs:   1,040,000+<br>Composite:    44/100<br><span class="mw">Critical: Engine & Drivetrain 38/100</span><br>Signals: GSC + GA4</div>`;}
+function sendP(t){document.getElementById('chat-inp').value=t;switchTab('agentic',document.querySelector('[data-tab="agentic"]'));sendChat();}
+function sendChat(){
+  const inp=document.getElementById('chat-inp'),t=inp.value.trim();if(!t)return;inp.value='';
+  const area=document.getElementById('chat-area');
+  const u=document.createElement('div');u.className='msg msg-u';u.innerHTML=`<div class="bub-u">${t}</div>`;area.appendChild(u);
+  document.getElementById('typing-ind').style.display='block';area.scrollTop=area.scrollHeight;
+  setTimeout(()=>{
+    document.getElementById('typing-ind').style.display='none';
+    const a=document.createElement('div');a.className='msg msg-a';
+    a.innerHTML=`<div class="ai-av">PT</div><div><div class="bub-a">${getResp(t)}</div><div class="mtag">Pivotree TowerTalk v2.1 · JEGS · GSC + GA4 only</div></div>`;
+    area.appendChild(a);area.scrollTop=area.scrollHeight;
+  },1200);
+}
+
+// Library
+const libProds=[
+  {brand:'Edelbrock',name:'Performer 650 CFM Carburetor',cat:'Engine & Drivetrain',cc:'cb-eng',attrs:'650 CFM · Dual-Feed · Manual Choke · Satin',pn:'1406',img:'🔧',bg:'#dbeafe'},
+  {brand:'K&N',name:'57 Series FIPK Cold Air Intake',cat:'Engine & Drivetrain',cc:'cb-eng',attrs:'2018-22 F-150 5.0L · High-Flow · Oiled Filter',pn:'57-2551',img:'💨',bg:'#dbeafe'},
+  {brand:'Holley',name:'Sniper EFI Self-Tuning Kit',cat:'Engine & Drivetrain',cc:'cb-eng',attrs:'650 HP · Gold · Throttle Body · 4-BBL',pn:'550-511K',img:'⚙️',bg:'#dbeafe'},
+  {brand:'MSD',name:'6AL Ignition Control Box',cat:'Electrical & Ignition',cc:'cb-elc',attrs:'6A Series · Rev Limiter · 45,000V · Universal',pn:'6425',img:'⚡',bg:'#ede9fe'},
+  {brand:'Flowmaster',name:'Super 44 Series Muffler',cat:'Exhaust Systems',cc:'cb-exh',attrs:'2.5" In/Out · Aggressive Sound · Aluminized Steel',pn:'942445',img:'🔩',bg:'#fee2e2'},
+  {brand:'Borla',name:'S-Type Cat-Back Exhaust',cat:'Exhaust Systems',cc:'cb-exh',attrs:'2021-23 F-150 5.0L · 304SS · Aggressive · 3" Main',pn:'140862',img:'🔩',bg:'#fee2e2'},
+  {brand:'Bilstein',name:'B8 Performance Plus Shock',cat:'Suspension & Steering',cc:'cb-sus',attrs:'Rear · Monotube · Gas-Charged · 2019-24 Silverado',pn:'24-196474',img:'🚗',bg:'#dcfce7'},
+  {brand:'StopTech',name:'Sport Brake Rotor Slotted/Drilled',cat:'Brakes',cc:'cb-brk',attrs:'Front · 330mm · Jeep Wrangler JL',pn:'127.58013R',img:'🔴',bg:'#fef3c7'},
+  {brand:'ARP',name:'Head Stud Kit — LS1/LS6',cat:'Engine & Drivetrain',cc:'cb-eng',attrs:'LS1/LS6 · 12pt · 210,000 PSI · Black Oxide',pn:'234-4144',img:'🔩',bg:'#dbeafe'},
+  {brand:'Moog',name:'Front Lower Control Arm Kit',cat:'Suspension & Steering',cc:'cb-sus',attrs:'2007-13 Silverado 1500 · OEM Replacement',pn:'RK621345',img:'🚗',bg:'#dcfce7'},
+  {brand:'NGK',name:'Iridium IX Spark Plug',cat:'Electrical & Ignition',cc:'cb-elc',attrs:'TR55IX · 0.044" Gap · Fine-Wire Iridium · 4-pack',pn:'6418',img:'⚡',bg:'#ede9fe'},
+  {brand:'Snap-on',name:'3/8" Drive Digital Torque Wrench',cat:'Tools & Shop',cc:'cb-tls',attrs:'5-100 ft-lb · ±2% · LED/Buzz Alert',pn:'ATECH2F100B',img:'🔧',bg:'#f1f5f9'},
+];
+let libDone=false;
+function initLib(){if(libDone)return;libDone=true;renderLibProds(libProds);}
+function renderLibProds(prods){document.getElementById('pgrid').innerHTML=prods.map(p=>`<div class="pc"><div class="pc-img" style="background:${p.bg}">${p.img}</div><div class="pc-body"><div class="pc-brand">${p.brand}</div><div class="pc-name">${p.name}</div><span class="cb ${p.cc}">${p.cat}</span><div class="pc-attrs">${p.attrs}</div><div class="pn">P/N: ${p.pn}</div><button class="btn btn-g btn-sm" style="width:100%" onclick="libQ(this,'${p.name.replace(/'/g,"\\'")}')">Send to Enrichment Queue</button></div></div>`).join('');}
+function libQ(btn,n){btn.className='btn btn-q btn-sm';btn.style.width='100%';btn.textContent='✓ In Queue';btn.disabled=true;showToast(n.substring(0,28)+'... queued','✅');}
+function libSearch(){const q=document.getElementById('lib-inp').value.toLowerCase();renderLibProds(q?libProds.filter(p=>p.name.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)):libProds);}
+function simMatch(){document.getElementById('match-up').style.display='none';document.getElementById('match-res').style.display='block';showToast('1,500 SKUs matched','✅');}
+
+// INIT
+applyF();resetDrill();initLib();
+</script>
+</body>
+</html>
