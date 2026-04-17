@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GA4 + GSC — JEGS SKU Enrichment (Pre-click + Post-click)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root{
+    --bg:#f8f9fa;
+    --surface:#ffffff;
+    --border:#e8eaed;
+    --border-strong:#dadce0;
+    --text:#202124;
+    --text-muted:#5f6368;
+    --text-faint:#80868b;
+    --blue:#1a73e8;
+    --blue-bg:#e8f0fe;
+    --green:#188038;
+    --green-bg:#e6f4ea;
+    --red:#c5221f;
+    --red-bg:#fce8e6;
+    --amber:#b06000;
+    --amber-bg:#fef7e0;
+    --purple:#7627bb;
+    --purple-bg:#f3e8fd;
+    --gsc:#34a853;
+    --gsc-bg:#e6f4ea;
+    --ga4:#f9ab00;
+    --ga4-bg:#fef7e0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:'Google Sans','Roboto',-apple-system,Segoe UI,sans-serif;color:var(--text);font-size:13px;line-height:1.5}
+
+  /* Top bar */
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:20}
+  .ga-logo{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:500}
+  .ga-logo .dot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#f9ab00 0%,#e8710a 100%)}
+  .source-pills{display:flex;gap:6px}
+  .source-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:500;border:1px solid}
+  .source-pill.ga4{background:var(--ga4-bg);color:var(--amber);border-color:#fde293}
+  .source-pill.gsc{background:var(--gsc-bg);color:var(--gsc);border-color:#a8dab5}
+  .source-pill i{width:6px;height:6px;border-radius:50%;display:inline-block;background:currentColor}
+  .property{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--text-muted)}
+  .property strong{color:var(--text);font-weight:500}
+  .topbar-spacer{flex:1}
+  .topbar-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e8eaed;color:var(--text-muted);font-size:12px;font-weight:500}
+
+  .shell{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 53px)}
+  .sidebar{background:#fff;border-right:1px solid var(--border);padding:12px 0;font-size:13px}
+  .nav-section{padding:4px 0}
+  .nav-title{padding:8px 24px 4px;color:var(--text-faint);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:500}
+  .nav-item{padding:8px 24px;cursor:pointer;display:flex;align-items:center;gap:12px;color:var(--text-muted);border-left:3px solid transparent}
+  .nav-item:hover{background:#f1f3f4;color:var(--text)}
+  .nav-item.active{background:var(--blue-bg);color:var(--blue);border-left-color:var(--blue);font-weight:500}
+  .nav-icon{width:14px;height:14px;display:inline-block;flex-shrink:0}
+  .badge-new{display:inline-block;background:var(--gsc-bg);color:var(--gsc);font-size:9px;padding:1px 5px;border-radius:8px;font-weight:500;margin-left:auto}
+
+  .main{padding:20px 28px 60px;min-width:0;overflow-x:hidden}
+
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+  .page-head h1{font-size:22px;font-weight:400;margin:0 0 4px}
+  .breadcrumb{color:var(--text-faint);font-size:12px;margin-bottom:6px}
+  .date-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border:1px solid var(--border-strong);border-radius:4px;background:#fff;font-size:13px}
+
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;align-items:center}
+  .filter-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border-strong);border-radius:16px;background:#fff;font-size:12px;color:var(--text-muted)}
+  .filter-chip.active{background:var(--blue-bg);border-color:#a8c7fa;color:var(--blue)}
+  .filter-chip.gsc-chip{background:var(--gsc-bg);border-color:#a8dab5;color:var(--gsc)}
+  .filter-chip.ga4-chip{background:var(--ga4-bg);border-color:#fde293;color:var(--amber)}
+  .filter-chip .x{color:var(--text-faint);font-weight:600}
+  .filter-add{color:var(--blue);cursor:pointer;font-weight:500;padding:5px 10px;font-size:12px}
+
+  /* Scorecards split by source */
+  .source-section{margin-bottom:20px}
+  .source-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .source-header h3{font-size:13px;font-weight:500;margin:0;color:var(--text)}
+  .source-header .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;font-weight:500;padding:2px 8px;border-radius:10px}
+  .source-header.gsc .tag{background:var(--gsc-bg);color:var(--gsc)}
+  .source-header.ga4 .tag{background:var(--ga4-bg);color:var(--amber)}
+  .source-header .desc{font-size:12px;color:var(--text-muted);margin-left:auto}
+
+  .scorecards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .scorecard{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;position:relative}
+  .scorecard.gsc{border-top:3px solid var(--gsc)}
+  .scorecard.ga4{border-top:3px solid var(--ga4)}
+  .scorecard .label{font-size:12px;color:var(--text-muted);font-weight:500;margin-bottom:4px}
+  .scorecard .value{font-size:24px;font-weight:400;letter-spacing:-0.3px}
+  .scorecard .delta{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:4px}
+  .delta.up{color:var(--green)}
+  .delta.down{color:var(--red)}
+  .delta.flat{color:var(--text-faint)}
+
+  .card{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:16px}
+  .card-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .card-head h2{font-size:14px;font-weight:500;margin:0}
+  .card-head .sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .card-body{padding:16px}
+  .card-actions{display:flex;gap:12px;color:var(--text-muted);font-size:12px}
+  .card-actions a{color:var(--blue);cursor:pointer;text-decoration:none}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+
+  .chart-wrap{position:relative;width:100%;height:260px}
+  .chart-wrap.tall{height:320px}
+  .chart-wrap.short{height:200px}
+
+  /* Quadrant chart wrapper — needs padding so bubbles don't clip */
+  .quad-wrap{position:relative;height:380px;padding:8px}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  thead th{text-align:left;padding:10px 10px;color:var(--text-muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;border-bottom:1px solid var(--border-strong);background:#fafafa;cursor:pointer;user-select:none;white-space:nowrap}
+  thead th:hover{background:#f1f3f4;color:var(--text)}
+  thead th.num{text-align:right}
+  thead th.sorted::after{content:'▼';margin-left:4px;color:var(--blue);font-size:9px}
+  thead th.group-gsc{background:var(--gsc-bg);color:var(--gsc);border-bottom-color:var(--gsc)}
+  thead th.group-ga4{background:var(--ga4-bg);color:var(--amber);border-bottom-color:var(--ga4)}
+  tbody td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+  tbody td.gsc-col{background:rgba(230,244,234,0.25)}
+  tbody td.ga4-col{background:rgba(254,247,224,0.25)}
+  tbody tr:hover td{background:#f8f9fa}
+  tbody tr:hover td.gsc-col{background:#e6f4ea}
+  tbody tr:hover td.ga4-col{background:var(--ga4-bg)}
+  .sku-cell{display:flex;align-items:center;gap:10px}
+  .sku-thumb{width:28px;height:28px;border-radius:4px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted);flex-shrink:0;border:1px solid var(--border)}
+  .sku-main{min-width:0}
+  .sku-id{font-family:'Roboto Mono',monospace;font-size:10px;color:var(--text-muted)}
+  .sku-name{font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+
+  .badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.3px}
+  .badge.high{background:var(--red-bg);color:var(--red)}
+  .badge.med{background:var(--amber-bg);color:var(--amber)}
+  .badge.low{background:var(--green-bg);color:var(--green)}
+  .badge.critical{background:#5b1411;color:#fcd8d5}
+  .badge.cat{background:var(--purple-bg);color:var(--purple)}
+
+  .mini-bar{width:60px;height:5px;background:var(--bg);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:4px}
+  .mini-bar .fill{height:100%;border-radius:3px}
+  .mini-bar .fill.blue{background:var(--blue)}
+  .mini-bar .fill.red{background:var(--red)}
+  .mini-bar .fill.amber{background:var(--amber)}
+  .mini-bar .fill.green{background:var(--green)}
+  .mini-bar .fill.gsc{background:var(--gsc)}
+
+  .pos-indicator{display:inline-flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
+  .pos-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+
+  /* Tabs */
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
+  .tab{padding:10px 16px;font-size:13px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;font-weight:500;white-space:nowrap}
+  .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+  .tab:hover:not(.active){color:var(--text);background:#f8f9fa}
+
+  /* Pagination */
+  .pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)}
+  .pager-btns{display:flex;gap:4px}
+  .pager-btn{padding:4px 10px;border:1px solid var(--border-strong);border-radius:3px;background:#fff;cursor:pointer;font-size:11px;color:var(--text-muted)}
+  .pager-btn:disabled{opacity:0.4;cursor:not-allowed}
+  .pager-btn.current{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+  .callout{background:var(--blue-bg);border-left:3px solid var(--blue);padding:12px 16px;border-radius:4px;margin-bottom:16px;font-size:13px;color:#174ea6}
+  .callout strong{color:var(--blue)}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:var(--text-muted)}
+  .legend-sq{display:inline-flex;align-items:center;gap:5px}
+  .legend-sq i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+  /* Quadrant legend */
+  .quad-info{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .quad-cell{padding:10px;border-radius:6px;font-size:11px;line-height:1.4}
+  .quad-cell strong{font-size:12px;display:block;margin-bottom:3px}
+  .quad-cell.critical{background:var(--red-bg);color:var(--red)}
+  .quad-cell.gsc-only{background:var(--gsc-bg);color:var(--gsc)}
+  .quad-cell.ga4-only{background:var(--ga4-bg);color:var(--amber)}
+  .quad-cell.healthy{background:#f1f3f4;color:var(--text-muted)}
+
+  /* Priority pill */
+  .priority-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:0.3px}
+  .priority-pill.p1{background:#5b1411;color:#fcd8d5}
+  .priority-pill.p2{background:var(--red-bg);color:var(--red)}
+  .priority-pill.p3{background:var(--amber-bg);color:var(--amber)}
+  .priority-pill.p4{background:var(--green-bg);color:var(--green)}
+
+  /* Split card with two sections */
+  .dual-card{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}
+  .dual-card-head{padding:14px 16px;border-bottom:1px solid var(--border)}
+  .dual-card-body{display:grid;grid-template-columns:1fr 1fr;min-height:280px}
+  .dual-section{padding:14px 16px}
+  .dual-section:first-child{border-right:1px solid var(--border);background:rgba(230,244,234,0.15)}
+  .dual-section:last-child{background:rgba(254,247,224,0.15)}
+  .dual-section-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .dual-section-head .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;font-weight:500;padding:2px 8px;border-radius:10px}
+  .dual-section-head .tag.gsc{background:var(--gsc-bg);color:var(--gsc)}
+  .dual-section-head .tag.ga4{background:var(--ga4-bg);color:var(--amber)}
+  .dual-section-head h4{font-size:13px;font-weight:500;margin:0}
+
+  .footer-note{font-size:11px;color:var(--text-faint);text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px}
+
+  .reconcile-note{font-size:11px;color:var(--text-faint);padding:8px 12px;background:#fafafa;border:1px dashed var(--border-strong);border-radius:4px;margin-top:10px}
+  .reconcile-note strong{color:var(--text-muted)}
+
+  /* Query table within SKU drill-down */
+  .query-table{font-size:11px}
+  .query-table td{padding:6px 8px;border-bottom:1px solid #f1f3f4}
+  .query-table .q{color:var(--text);font-family:'Roboto Mono',monospace;font-size:11px}
+  .query-table .imp{color:var(--text-muted);text-align:right;font-variant-numeric:tabular-nums}
+
+  /* Flex row */
+  .kpi-row{display:flex;gap:12px;flex-wrap:wrap}
+  .kpi{flex:1;min-width:140px}
+
+  /* Icons */
+  .icn{width:18px;height:18px;display:inline-block;position:relative;flex-shrink:0}
+  .icn-home::before{content:'';position:absolute;inset:3px;border:1.5px solid currentColor;border-radius:2px;border-top:none}
+  .icn-home::after{content:'';position:absolute;left:3px;right:3px;top:3px;height:4px;border:1.5px solid currentColor;border-radius:2px 2px 0 0;clip-path:polygon(50% 0%, 100% 100%, 0% 100%)}
+  .icn-bar{background:linear-gradient(to top,currentColor 30%,transparent 30%) 0 100%/4px 50% no-repeat,linear-gradient(to top,currentColor 60%,transparent 60%) 50% 100%/4px 80% no-repeat,linear-gradient(to top,currentColor 40%,transparent 40%) 100% 100%/4px 65% no-repeat}
+  .icn-ecom{border:1.5px solid currentColor;border-radius:2px 2px 4px 4px;box-shadow:inset 0 4px 0 -2px currentColor}
+  .icn-sku{border:1.5px solid currentColor;border-radius:2px;background:repeating-linear-gradient(90deg,currentColor 0 1.5px,transparent 1.5px 4px) center/70% 50% no-repeat}
+  .icn-search{width:14px;height:14px;border:1.5px solid currentColor;border-radius:50%;position:relative}
+  .icn-search::after{content:'';position:absolute;width:6px;height:1.5px;background:currentColor;right:-4px;bottom:-1px;transform:rotate(45deg)}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="ga-logo"><span class="dot"></span> Analytics <span style="color:var(--text-faint);font-weight:400;font-size:13px;margin-left:4px">+ Search Console</span></div>
+  <div class="property"><span>All accounts ›</span> <strong>JEGS Performance</strong></div>
+  <div class="source-pills">
+    <span class="source-pill ga4"><i></i>GA4 connected</span>
+    <span class="source-pill gsc"><i></i>GSC connected</span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-btn">JS</div>
+</div>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="nav-section">
+      <div class="nav-item"><span class="icn icn-home"></span> Home</div>
+      <div class="nav-item"><span class="icn icn-bar"></span> Reports</div>
+      <div class="nav-item"><span class="icn icn-ecom"></span> Monetization</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">Acquisition</div>
+      <div class="nav-item"><span class="icn icn-search"></span> Search Console</div>
+      <div class="nav-item"><span class="icn icn-bar"></span> Traffic acquisition</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">Custom</div>
+      <div class="nav-item active"><span class="icn icn-sku"></span> SKU enrichment <span class="badge-new">UPDATED</span></div>
+      <div class="nav-item"><span class="icn icn-bar"></span> Catalog coverage</div>
+      <div class="nav-item"><span class="icn icn-search"></span> Query gap analysis</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="page-head">
+      <div>
+        <div class="breadcrumb">Custom › SKU enrichment › <strong>Pre-click + post-click view</strong></div>
+        <h1>SKU enrichment — GSC × GA4 joined analysis</h1>
+        <div style="color:var(--text-muted);font-size:13px">Discoverability (GSC) and conversion (GA4) side-by-side for the top 500 SKUs. Priority = weakness on both sides.</div>
+      </div>
+      <div class="date-pill">Mar 17 – Apr 15, 2026 ▾</div>
+    </div>
+
+    <div class="filters">
+      <span style="color:var(--text-muted);font-size:12px;margin-right:4px">Filters:</span>
+      <span class="filter-chip gsc-chip">GSC: Impressions ≥ 500 <span class="x">×</span></span>
+      <span class="filter-chip ga4-chip">GA4: PDP sessions ≥ 200 <span class="x">×</span></span>
+      <span class="filter-chip active">Joined opportunity score &lt; 70 <span class="x">×</span></span>
+      <span class="filter-chip">Brand: All <span class="x">▾</span></span>
+      <span class="filter-chip">Category: All <span class="x">▾</span></span>
+      <span class="filter-add">+ Add filter</span>
+      <div style="flex:1"></div>
+      <span style="font-size:11px;color:var(--text-faint)">GSC refresh: 2 days lag · GA4: 14 min ago</span>
+    </div>
+
+    <div class="callout">
+      <strong>How to read this.</strong> Each SKU now has two scores: a <strong>Discoverability score</strong> from GSC (impressions × CTR gap × position) and a <strong>Conversion score</strong> from GA4 (view→cart × cart→purchase × revenue potential). The combined priority ranks SKUs weak on both sides — these are where enrichment delivers compounding returns. Of 500 SKUs, <strong>138 are weak in both</strong> (P1 critical), 142 GSC-only, 128 GA4-only, 92 mostly healthy.
+    </div>
+
+    <!-- GSC scorecards -->
+    <div class="source-section">
+      <div class="source-header gsc">
+        <span class="tag">Google Search Console</span>
+        <h3>Pre-click: discoverability</h3>
+        <div class="desc">What happens on Google before the visitor arrives</div>
+      </div>
+      <div class="scorecards">
+        <div class="scorecard gsc">
+          <div class="label">Total impressions (500 SKUs)</div>
+          <div class="value">4.82M</div>
+          <div class="delta up">▲ 6.1% vs prev. 30d</div>
+        </div>
+        <div class="scorecard gsc">
+          <div class="label">Total clicks</div>
+          <div class="value">96.3K</div>
+          <div class="delta down">▼ CTR 2.0% (benchmark 3.4%)</div>
+        </div>
+        <div class="scorecard gsc">
+          <div class="label">Avg. position</div>
+          <div class="value">18.7</div>
+          <div class="delta down">▼ 2.3 positions — declining</div>
+        </div>
+        <div class="scorecard gsc">
+          <div class="label">Queries without click</div>
+          <div class="value">3,420</div>
+          <div class="delta flat">High-impression, zero-click terms</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GA4 scorecards -->
+    <div class="source-section">
+      <div class="source-header ga4">
+        <span class="tag">Google Analytics 4</span>
+        <h3>Post-click: conversion</h3>
+        <div class="desc">What happens on the PDP after the visitor arrives</div>
+      </div>
+      <div class="scorecards">
+        <div class="scorecard ga4">
+          <div class="label">PDP sessions (500 SKUs)</div>
+          <div class="value">1.24M</div>
+          <div class="delta up">▲ 4.2%</div>
+        </div>
+        <div class="scorecard ga4">
+          <div class="label">Avg. view→cart rate</div>
+          <div class="value">2.9%</div>
+          <div class="delta down">▼ vs 7.2% catalog avg</div>
+        </div>
+        <div class="scorecard ga4">
+          <div class="label">Revenue (30d)</div>
+          <div class="value">$487K</div>
+          <div class="delta up">▲ 3.1%</div>
+        </div>
+        <div class="scorecard ga4">
+          <div class="label">Projected annual lift</div>
+          <div class="value" style="color:var(--green)">$3.21M</div>
+          <div class="delta up">▲ if enriched</div>
+        </div>
+      </div>
+      <div class="reconcile-note">
+        <strong>Note on source reconciliation:</strong> GSC reports 96.3K clicks from Google organic; GA4 reports 112.4K organic sessions on the same URLs. The 14% gap is normal — attribution differences, cross-device sessions, and includes Google Images/Discover not in the GSC default view.
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active">Joined opportunity</div>
+      <div class="tab">GSC signals</div>
+      <div class="tab">GA4 signals</div>
+      <div class="tab">Top 500 SKUs</div>
+      <div class="tab">Query gaps</div>
+      <div class="tab">Funnel diagnostics</div>
+    </div>
+
+    <!-- THE QUADRANT: GSC vs GA4 -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Discoverability × Conversion — the enrichment priority quadrant</h2>
+          <div class="sub">Each bubble is a SKU. X-axis = GSC discoverability score. Y-axis = GA4 conversion score. Bubble size = projected annual revenue lift.</div>
+        </div>
+        <div class="card-actions"><a>Export</a><a>⋮</a></div>
+      </div>
+      <div class="card-body">
+        <div class="quad-wrap"><canvas id="quadChart" role="img" aria-label="Scatter plot of SKUs by GSC discoverability vs GA4 conversion score"></canvas></div>
+        <div class="quad-info">
+          <div class="quad-cell critical">
+            <strong>🔥 P1 — Weak in both (138 SKUs)</strong>
+            Poor ranking AND poor PDP conversion. Full enrichment: title + meta + body copy + fitment + images + specs. Highest ROI.
+          </div>
+          <div class="quad-cell gsc-only">
+            <strong>GSC-only weakness (142 SKUs)</strong>
+            PDP converts fine, but Google doesn't surface it. Fix titles, meta descriptions, structured data, H1s.
+          </div>
+          <div class="quad-cell ga4-only">
+            <strong>GA4-only weakness (128 SKUs)</strong>
+            Google ranks it, visitors click — then bounce. Fix on-page content: fitment tables, photos, specs, reviews.
+          </div>
+          <div class="quad-cell healthy">
+            <strong>Healthy (92 SKUs)</strong>
+            Monitor only. Still made the top 500 due to traffic volume.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side-by-side trends -->
+    <div class="dual-card">
+      <div class="dual-card-head">
+        <h2 style="font-size:14px;font-weight:500;margin:0">30-day trend — pre-click vs. post-click for the top 500</h2>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Both sides degrading slightly — suggests enrichment debt is compounding</div>
+      </div>
+      <div class="dual-card-body">
+        <div class="dual-section">
+          <div class="dual-section-head"><span class="tag gsc">GSC</span><h4>Impressions, clicks, avg. position</h4></div>
+          <div class="chart-wrap short"><canvas id="gscTrend" role="img" aria-label="GSC 30-day trend"></canvas></div>
+        </div>
+        <div class="dual-section">
+          <div class="dual-section-head"><span class="tag ga4">GA4</span><h4>Sessions, add-to-cart, purchases</h4></div>
+          <div class="chart-wrap short"><canvas id="ga4Trend" role="img" aria-label="GA4 30-day trend"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTR gap chart + Gap type lift -->
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2><span class="tag" style="background:var(--gsc-bg);color:var(--gsc);font-size:10px;padding:2px 6px;border-radius:8px;margin-right:6px">GSC</span>CTR vs. position benchmark</h2>
+            <div class="sub">Actual CTR (orange) falls below expected CTR for rank position (gray). Gap = enrichment signal.</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap"><canvas id="ctrBench" role="img" aria-label="CTR vs position benchmark"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2><span class="tag" style="background:var(--ga4-bg);color:var(--amber);font-size:10px;padding:2px 6px;border-radius:8px;margin-right:6px">GA4</span>Projected revenue lift by gap type</h2>
+            <div class="sub">Annual lift if every top-500 SKU were fully enriched</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap"><canvas id="liftBar" role="img" aria-label="Lift by gap type"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The BIG joined table -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Top 500 SKUs — joined GSC × GA4 view</h2>
+          <div class="sub">Showing 1–20 of 500 · sorted by <strong>Joined priority</strong>. Green-tinted columns = GSC. Amber-tinted = GA4.</div>
+        </div>
+        <div class="card-actions">
+          <a>⬇ Export CSV (500 rows)</a>
+          <a>Send to PIM</a>
+          <a>⋮</a>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="skuTable">
+          <thead>
+            <tr>
+              <th style="width:28px">#</th>
+              <th>SKU / Product</th>
+              <th>Priority</th>
+              <th class="group-gsc num">GSC impressions</th>
+              <th class="group-gsc num">Clicks</th>
+              <th class="group-gsc num">CTR</th>
+              <th class="group-gsc num">Avg. pos</th>
+              <th class="group-ga4 num">PDP sessions</th>
+              <th class="group-ga4 num">V→C</th>
+              <th class="group-ga4 num">Rev. 30d</th>
+              <th class="num">Disc.</th>
+              <th class="num">Conv.</th>
+              <th class="num sorted">Joined</th>
+              <th class="num">Proj. lift</th>
+            </tr>
+          </thead>
+          <tbody id="skuBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div>Showing <strong id="pageRange">1–20</strong> of 500</div>
+        <div class="pager-btns">
+          <button class="pager-btn" id="prevBtn" disabled onclick="goPage(currentPage-1)">‹ Prev</button>
+          <button class="pager-btn current">1</button>
+          <button class="pager-btn" onclick="goPage(2)">2</button>
+          <button class="pager-btn" onclick="goPage(3)">3</button>
+          <button class="pager-btn" onclick="goPage(4)">4</button>
+          <span style="padding:4px 6px;color:var(--text-faint)">…</span>
+          <button class="pager-btn" onclick="goPage(25)">25</button>
+          <button class="pager-btn" id="nextBtn" onclick="goPage(currentPage+1)">Next ›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drill down: queries driving impressions to top-5 under-performing SKUs -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2><span class="tag" style="background:var(--gsc-bg);color:var(--gsc);font-size:10px;padding:2px 6px;border-radius:8px;margin-right:6px">GSC</span>Query-level gaps for the #1 priority SKU</h2>
+          <div class="sub">Edelbrock Aluminum Cylinder Head 200cc SBC — <code>JGS-100423</code> — top queries where JEGS shows up but doesn't earn the click</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
+          <div>
+            <table class="query-table">
+              <thead style="background:none">
+                <tr style="background:#fafafa">
+                  <th style="text-align:left;padding:8px;font-size:10px">Query</th>
+                  <th style="text-align:right;padding:8px;font-size:10px">Impr.</th>
+                  <th style="text-align:right;padding:8px;font-size:10px">Clicks</th>
+                  <th style="text-align:right;padding:8px;font-size:10px">CTR</th>
+                  <th style="text-align:right;padding:8px;font-size:10px">Pos</th>
+                  <th style="text-align:left;padding:8px;font-size:10px">Gap diagnosis</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="q">edelbrock aluminum heads sbc</td><td class="imp">12,480</td><td class="imp">186</td><td class="imp">1.5%</td><td class="imp">8.2</td><td style="font-size:11px;color:var(--red)">Title missing "200cc" modifier</td></tr>
+                <tr><td class="q">sbc 200cc cylinder heads</td><td class="imp">8,220</td><td class="imp">54</td><td class="imp">0.7%</td><td class="imp">14.1</td><td style="font-size:11px;color:var(--red)">Not ranking for core modifier</td></tr>
+                <tr><td class="q">edelbrock performer rpm heads</td><td class="imp">6,100</td><td class="imp">89</td><td class="imp">1.5%</td><td class="imp">9.8</td><td style="font-size:11px;color:var(--amber)">Meta description generic</td></tr>
+                <tr><td class="q">350 chevy aluminum heads</td><td class="imp">4,950</td><td class="imp">31</td><td class="imp">0.6%</td><td class="imp">18.3</td><td style="font-size:11px;color:var(--red)">Missing fitment schema</td></tr>
+                <tr><td class="q">sbc heads for 383 stroker</td><td class="imp">3,880</td><td class="imp">0</td><td class="imp">0.0%</td><td class="imp">22.0</td><td style="font-size:11px;color:var(--red)">Zero-click: stroker application not mentioned</td></tr>
+                <tr><td class="q">best aluminum heads street</td><td class="imp">3,110</td><td class="imp">12</td><td class="imp">0.4%</td><td class="imp">26.4</td><td style="font-size:11px;color:var(--amber)">Use case absent from copy</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="background:#fafafa;border-radius:6px;padding:14px;font-size:12px">
+            <div style="font-weight:500;margin-bottom:8px;color:var(--text)">Enrichment playbook for this SKU</div>
+            <ol style="padding-left:18px;margin:0;line-height:1.7;color:var(--text-muted)">
+              <li><strong style="color:var(--text)">Title:</strong> Add "200cc" + "Performer RPM" + "SBC 350/383"</li>
+              <li><strong style="color:var(--text)">Meta:</strong> Rewrite with chamber cc, application, material</li>
+              <li><strong style="color:var(--text)">H1 + body:</strong> Explicit stroker compatibility section</li>
+              <li><strong style="color:var(--text)">Schema:</strong> Product schema with fitment (year/make/model/engine)</li>
+              <li><strong style="color:var(--text)">PDP content:</strong> Port/valve/spring spec table, install notes</li>
+              <li><strong style="color:var(--text)">Images:</strong> 4 → 9 images (intake face, combustion chamber, exhaust port, installed)</li>
+            </ol>
+            <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted)">
+              Est. lift: <strong style="color:var(--green)">+$42K / year</strong> · Est. effort: 2.5 hrs content + 1 hr photography
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Funnel with GSC as the top of the funnel -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Full funnel — GSC impressions through GA4 purchase</h2>
+          <div class="sub">The first two steps are GSC; the remainder is GA4. Enrichment impacts every step.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="funnelChart" role="img" aria-label="Full funnel from impression to purchase"></canvas></div>
+        <div class="legend" style="margin-top:12px">
+          <span class="legend-sq"><i style="background:var(--gsc)"></i>GSC stages</span>
+          <span class="legend-sq"><i style="background:var(--ga4)"></i>GA4 stages</span>
+          <span class="legend-sq"><i style="background:#9aa0a6"></i>Catalog benchmark</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Data sources: GA4 BigQuery export (<code>jegs_ga4.events_*</code>) + Search Console API (<code>sc-domain:jegs.com</code>) joined on <code>page_path → sku_id</code> via PIM · Opportunity model v3.0 · Simulated for illustrative purposes
+    </div>
+
+  </main>
+</div>
+
+<script>
+Chart.defaults.font.family = "'Google Sans','Roboto',sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#5f6368';
+Chart.defaults.borderColor = '#e8eaed';
+
+/* ============================================================
+   Data generation
+   ============================================================ */
+const CATEGORIES = [
+  {name:'Engines & components', weight:0.18},
+  {name:'Exhaust systems',      weight:0.14},
+  {name:'Suspension & steering',weight:0.12},
+  {name:'Wheels & tires',       weight:0.11},
+  {name:'Fuel systems',         weight:0.09},
+  {name:'Brakes',               weight:0.08},
+  {name:'Ignition & electrical',weight:0.07},
+  {name:'Transmission & drivetrain',weight:0.07},
+  {name:'Body & exterior',      weight:0.06},
+  {name:'Interior & trim',      weight:0.05},
+  {name:'Tools & garage',       weight:0.03}
+];
+
+const BRANDS = ['Edelbrock','MSD','Holley','Flowmaster','MagnaFlow','Ford Performance','Chevrolet Performance','JEGS','Moroso','AFR','Hooker','MBRP','Weld Racing','Mickey Thompson','BFGoodrich','Wilwood','Baer','KYB','QA1','Ridetech','ARP','FITech','Aeromotive','B&M','Hurst','TCI','Summit','Comp Cams','Crane Cams','Isky'];
+
+const PRODUCT_TEMPLATES = {
+  'Engines & components': ['{brand} Aluminum Cylinder Head 200cc SBC','{brand} Forged Crankshaft 350ci 3.48" Stroke','{brand} Roller Rocker Arms 1.6 Ratio 7/16" Stud','{brand} Performance Camshaft 224/230 Duration','{brand} High Volume Oil Pump for SBF','{brand} Hydraulic Flat Tappet Lifter Set','{brand} Main Stud Kit for LS Engines','{brand} Connecting Rod Bolt Kit 7/16"'],
+  'Exhaust systems': ['{brand} Cat-Back Exhaust Kit 3" Stainless','{brand} Long Tube Headers 1-7/8" Ceramic','{brand} Dual Chamber Muffler 2.5" Offset','{brand} X-Pipe 2.5" Stainless Steel','{brand} Turbo Downpipe 3" Mandrel Bent','{brand} Axle-Back Dual Tip 4" Polished'],
+  'Suspension & steering': ['{brand} Coilover Conversion Kit Front','{brand} Tubular Control Arms Upper/Lower','{brand} Adjustable Panhard Bar','{brand} Power Rack & Pinion Conversion','{brand} Sway Bar Kit 1-1/4" Front','{brand} Gas Shocks Rear Pair'],
+  'Wheels & tires': ['{brand} RT-S S71 18x9 Forged Wheel','{brand} Drag Pro Star 15x10 5x4.5','{brand} Pro Street Radial 275/60R15','{brand} ET Drag Slick 32x14-15','{brand} Classic 5-Spoke 17x8 Polished'],
+  'Fuel systems': ['{brand} EFI Fuel Rail Kit LS1/LS6','{brand} 750 CFM 4-Barrel Carburetor','{brand} In-Tank Fuel Pump 340LPH','{brand} Fuel Pressure Regulator Adjustable','{brand} Throttle Body 102mm Drive-By-Wire','{brand} Fuel Injector Set 42lb/hr 8-pack'],
+  'Brakes': ['{brand} 13" 6-Piston Front Big Brake Kit','{brand} Rear Disc Brake Conversion Kit','{brand} Semi-Metallic Brake Pads Front','{brand} Slotted & Drilled Rotor 12.8"','{brand} Stainless Braided Brake Line Kit'],
+  'Ignition & electrical': ['{brand} 6AL Digital Ignition Box','{brand} Pro Billet Distributor Ready-to-Run','{brand} 8.5mm Spark Plug Wire Set','{brand} HEI Coil 50,000 Volt','{brand} High-Output Alternator 200 Amp'],
+  'Transmission & drivetrain': ['{brand} TH400 Performance Transmission','{brand} 9" Rear End Housing Fabricated','{brand} 4L80E Stage 3 Rebuild Kit','{brand} SFI Bellhousing SBC to T56','{brand} Pro Shifter Ratchet Auto'],
+  'Body & exterior': ['{brand} Cowl Induction Hood Scoop','{brand} LED Headlight Conversion 7"','{brand} Billet Aluminum Hood Pins','{brand} Fiberglass Front Fenders 2" Wider'],
+  'Interior & trim': ['{brand} 5-Point Racing Harness SFI 16.1','{brand} Pro Street Bucket Seats Pair','{brand} 3-Gauge A-Pillar Pod','{brand} Billet Steering Wheel 14"'],
+  'Tools & garage': ['{brand} Torque Wrench 3/8" Drive 250 ft-lb','{brand} Engine Stand 2000 lb Capacity','{brand} Floor Jack 3-Ton Low Profile']
+};
+
+function mulberry32(seed){return function(){let t=seed+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+const rand = mulberry32(202604172);
+function pick(arr){return arr[Math.floor(rand()*arr.length)]}
+function wpick(arr){let r=rand(),c=0;for(const a of arr){c+=a.weight;if(r<c)return a}return arr[arr.length-1]}
+function range(min,max){return min+rand()*(max-min)}
+
+function genSKU(i){
+  const cat = wpick(CATEGORIES).name;
+  const brand = pick(BRANDS);
+  const tmpl = pick(PRODUCT_TEMPLATES[cat]);
+  const name = tmpl.replace('{brand}',brand);
+
+  // GSC metrics
+  const impressions = Math.floor(range(1800, 45000) / (1 + i*0.003));
+  const position = range(6, 34);
+  // Expected CTR by position (rough industry curve)
+  const expCTR = Math.max(0.005, 0.31 * Math.exp(-0.19 * position));
+  // Actual CTR — undercuts expected to varying degrees (this is the enrichment signal)
+  const ctrShortfall = range(0.3, 0.85); // 30-85% of expected
+  const actualCTR = expCTR * ctrShortfall;
+  const clicks = Math.floor(impressions * actualCTR);
+
+  // GA4 metrics (slightly higher than GSC clicks — cross-device, other search surfaces)
+  const pdpSessions = Math.floor(clicks * range(1.08, 1.35) + range(200, 1500));
+  const viewToCart = range(0.012, 0.072);
+  const cartToPurchase = range(0.18, 0.52);
+  const carts = Math.floor(pdpSessions * viewToCart);
+  const purchases = Math.floor(carts * cartToPurchase);
+  const avgPrice = range(45, 2800);
+  const rev30 = Math.round(purchases * avgPrice);
+
+  // Discoverability score (GSC) — 0-100, higher = healthier
+  const posScore = Math.max(0, 1 - position/30);
+  const ctrScore = Math.min(1, actualCTR / expCTR);
+  const impScore = Math.min(1, Math.log(impressions+1) / Math.log(50000));
+  const discScore = Math.round((posScore*0.3 + ctrScore*0.5 + impScore*0.2) * 100);
+
+  // Conversion score (GA4) — 0-100
+  const v2cScore = Math.min(1, viewToCart / 0.08);
+  const c2pScore = Math.min(1, cartToPurchase / 0.45);
+  const revScore = Math.min(1, rev30 / 20000);
+  const convScore = Math.round((v2cScore*0.5 + c2pScore*0.2 + revScore*0.3) * 100);
+
+  // Joined priority score — weak on both = highest priority
+  // Lower of the two scores weighted more (min+mean)
+  const joined = Math.round(((100-discScore)*0.5 + (100-convScore)*0.5));
+
+  // Priority tier
+  let priority, pTag;
+  if(discScore<40 && convScore<40){priority='P1'; pTag='critical';}
+  else if(discScore<55 && convScore<55){priority='P2'; pTag='high';}
+  else if(discScore<70 || convScore<70){priority='P3'; pTag='med';}
+  else {priority='P4'; pTag='low';}
+
+  // Projected lift
+  const upliftFactor = (100-discScore)*0.003 + (100-convScore)*0.003;
+  const projLift = Math.round(rev30 * 12 * (1 + upliftFactor));
+
+  return {
+    sku: `JGS-${String(100000+i*17 + Math.floor(rand()*13)).slice(0,6)}`,
+    name, cat, brand,
+    impressions, clicks, position, actualCTR, expCTR,
+    pdpSessions, viewToCart, cartToPurchase, rev30, avgPrice,
+    discScore, convScore, joined,
+    priority, pTag,
+    projLift
+  };
+}
+
+const skus = [];
+for(let i=0;i<500;i++) skus.push(genSKU(i));
+skus.sort((a,b)=>b.joined-a.joined);
+skus.forEach((s,i)=>s.rank=i+1);
+
+// Force the #1 to be the Edelbrock head we reference in the query drill-down
+skus[0].name = 'Edelbrock Aluminum Cylinder Head 200cc SBC';
+skus[0].brand = 'Edelbrock';
+skus[0].cat = 'Engines & components';
+skus[0].sku = 'JGS-100423';
+
+/* ============================================================
+   Table render
+   ============================================================ */
+const PAGE_SIZE = 20;
+let currentPage = 1;
+
+function fmtInt(n){return n.toLocaleString('en-US')}
+function fmtK(n){if(n>=1000)return (n/1000).toFixed(1)+'k'; return n.toString()}
+function fmtMoney(n){return '$'+Math.round(n).toLocaleString('en-US')}
+function fmtPct(n,d=1){return (n*100).toFixed(d)+'%'}
+
+function scoreColor(s){
+  if(s<40) return '#c5221f';
+  if(s<55) return '#e8710a';
+  if(s<70) return '#f9ab00';
+  return '#188038';
+}
+function scorePill(s){
+  // Lower score (GSC/GA4 health) = worse. Here we're displaying the raw health score 0-100
+  const col = s>=70 ? '#188038' : s>=55 ? '#f9ab00' : s>=40 ? '#e8710a' : '#c5221f';
+  return `<div style="display:inline-flex;align-items:center;gap:6px;justify-content:flex-end">
+    <div style="width:40px;height:5px;background:#f1f3f4;border-radius:3px;overflow:hidden"><div style="width:${s}%;height:100%;background:${col}"></div></div>
+    <span style="font-weight:500;color:${col};min-width:22px;text-align:right">${s}</span>
+  </div>`;
+}
+function joinedPill(s){
+  // Higher joined score = more opportunity / worse current state
+  const col = s>=60 ? '#c5221f' : s>=45 ? '#e8710a' : s>=30 ? '#f9ab00' : '#188038';
+  return `<div style="display:inline-flex;align-items:center;gap:6px;justify-content:flex-end">
+    <div style="width:50px;height:6px;background:#f1f3f4;border-radius:3px;overflow:hidden"><div style="width:${s}%;height:100%;background:${col}"></div></div>
+    <span style="font-weight:500;color:${col};min-width:24px;text-align:right">${s}</span>
+  </div>`;
+}
+
+function renderTable(){
+  const body = document.getElementById('skuBody');
+  const start = (currentPage-1)*PAGE_SIZE;
+  const rows = skus.slice(start, start+PAGE_SIZE);
+  body.innerHTML = rows.map(s=>{
+    const v2c = s.viewToCart;
+    const v2cClass = v2c<0.025 ? 'red' : v2c<0.045 ? 'amber' : v2c<0.06 ? 'blue' : 'green';
+    const v2cFill = Math.min(100, v2c/0.08*100);
+    const ctrClass = s.actualCTR/s.expCTR<0.5 ? 'red' : s.actualCTR/s.expCTR<0.75 ? 'amber' : 'gsc';
+    return `<tr>
+      <td style="color:var(--text-faint);font-variant-numeric:tabular-nums;font-size:11px">${s.rank}</td>
+      <td>
+        <div class="sku-cell">
+          <div class="sku-thumb">⚙</div>
+          <div class="sku-main">
+            <div class="sku-name" title="${s.name}">${s.name}</div>
+            <div class="sku-id">${s.sku} · ${s.brand} · ${s.cat}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="priority-pill ${s.pTag==='critical'?'p1':s.pTag==='high'?'p2':s.pTag==='med'?'p3':'p4'}">${s.priority}</span></td>
+
+      <td class="num gsc-col">${fmtK(s.impressions)}</td>
+      <td class="num gsc-col">${fmtK(s.clicks)}</td>
+      <td class="num gsc-col">
+        <div style="display:inline-flex;align-items:center;gap:4px;justify-content:flex-end">
+          <span class="mini-bar"><span class="fill ${ctrClass}" style="width:${Math.min(100,s.actualCTR*100*8)}%"></span></span>
+          <span class="pct">${fmtPct(s.actualCTR,1)}</span>
+        </div>
+      </td>
+      <td class="num gsc-col">${s.position.toFixed(1)}</td>
+
+      <td class="num ga4-col">${fmtK(s.pdpSessions)}</td>
+      <td class="num ga4-col">
+        <div style="display:inline-flex;align-items:center;gap:4px;justify-content:flex-end">
+          <span class="mini-bar"><span class="fill ${v2cClass}" style="width:${v2cFill}%"></span></span>
+          <span class="pct">${fmtPct(v2c,1)}</span>
+        </div>
+      </td>
+      <td class="num ga4-col">${fmtMoney(s.rev30)}</td>
+
+      <td class="num">${scorePill(s.discScore)}</td>
+      <td class="num">${scorePill(s.convScore)}</td>
+      <td class="num">${joinedPill(s.joined)}</td>
+      <td class="num" style="color:var(--green);font-weight:500">${fmtMoney(s.projLift)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('pageRange').textContent = `${start+1}–${Math.min(start+PAGE_SIZE,500)}`;
+  document.getElementById('prevBtn').disabled = currentPage===1;
+  document.getElementById('nextBtn').disabled = currentPage>=25;
+}
+function goPage(p){if(p<1||p>25)return;currentPage=p;renderTable();window.scrollTo({top:document.getElementById('skuTable').offsetTop-80,behavior:'smooth'})}
+renderTable();
+
+/* ============================================================
+   Quadrant scatter
+   ============================================================ */
+new Chart(document.getElementById('quadChart'),{
+  type:'bubble',
+  data:{
+    datasets:[{
+      data: skus.map(s=>({
+        x:s.discScore, y:s.convScore,
+        r: Math.max(3, Math.min(20, Math.log(s.projLift+1)/Math.log(10)*2.5 - 6))
+      })),
+      backgroundColor: skus.map(s=>{
+        if(s.discScore<40 && s.convScore<40) return 'rgba(197,34,31,0.55)';
+        if(s.discScore<55 && s.convScore<55) return 'rgba(232,113,10,0.5)';
+        if(s.discScore<55) return 'rgba(52,168,83,0.5)';
+        if(s.convScore<55) return 'rgba(249,171,0,0.5)';
+        return 'rgba(154,160,166,0.4)';
+      }),
+      borderColor: skus.map(s=>{
+        if(s.discScore<40 && s.convScore<40) return '#c5221f';
+        if(s.discScore<55 && s.convScore<55) return '#e8710a';
+        if(s.discScore<55) return '#34a853';
+        if(s.convScore<55) return '#f9ab00';
+        return '#9aa0a6';
+      }),
+      borderWidth:1
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    layout:{padding:12},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#202124',padding:10,
+        callbacks:{
+          label:ctx=>{const i=ctx.dataIndex;const s=skus[i];return [s.name,`GSC disc: ${s.discScore} · GA4 conv: ${s.convScore}`,`Lift: ${fmtMoney(s.projLift)}/yr`]}
+        }
+      }
+    },
+    scales:{
+      x:{
+        title:{display:true,text:'GSC discoverability score →',color:'#34a853',font:{size:12,weight:'500'}},
+        min:0,max:100,
+        grid:{color:ctx=>ctx.tick.value===50?'#dadce0':'#f1f3f4',lineWidth:ctx=>ctx.tick.value===50?1.5:1},
+        ticks:{stepSize:25}
+      },
+      y:{
+        title:{display:true,text:'GA4 conversion score →',color:'#f9ab00',font:{size:12,weight:'500'}},
+        min:0,max:100,
+        grid:{color:ctx=>ctx.tick.value===50?'#dadce0':'#f1f3f4',lineWidth:ctx=>ctx.tick.value===50?1.5:1},
+        ticks:{stepSize:25}
+      }
+    }
+  }
+});
+
+/* ============================================================
+   Dual trend charts
+   ============================================================ */
+const days = Array.from({length:30},(_,i)=>{
+  const d = new Date(2026,2,17); d.setDate(d.getDate()+i);
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+});
+
+// GSC trend
+const impSeries = days.map((_,i)=>Math.round(155000 + 18000*Math.sin(i/4) + rand()*12000 - i*300));
+const clickSeries = impSeries.map(v=>Math.round(v*0.019 + rand()*80));
+const posSeries = days.map((_,i)=>+(17.2 + Math.sin(i/5)*1.5 + rand()*0.8 + i*0.04).toFixed(1));
+
+new Chart(document.getElementById('gscTrend'),{
+  data:{labels:days,datasets:[
+    {type:'line',label:'Impressions',data:impSeries,borderColor:'#34a853',backgroundColor:'rgba(52,168,83,0.1)',fill:true,tension:0.3,borderWidth:2,pointRadius:0,pointHoverRadius:4,yAxisID:'y'},
+    {type:'line',label:'Clicks',data:clickSeries,borderColor:'#0d652d',tension:0.3,borderWidth:2,pointRadius:0,pointHoverRadius:4,borderDash:[3,3],yAxisID:'y1'},
+    {type:'line',label:'Avg position',data:posSeries,borderColor:'#9aa0a6',tension:0.3,borderWidth:1.5,pointRadius:0,pointHoverRadius:4,borderDash:[1,3],yAxisID:'y2'}
+  ]},
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10,font:{size:10}}},tooltip:{backgroundColor:'#202124'}},
+    scales:{
+      x:{grid:{display:false},ticks:{maxTicksLimit:8,font:{size:9}}},
+      y:{position:'left',grid:{color:'#f1f3f4'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v,font:{size:10}}},
+      y1:{position:'right',grid:{display:false},ticks:{callback:v=>v.toLocaleString(),font:{size:10}}},
+      y2:{display:false,reverse:true}
+    }
+  }
+});
+
+// GA4 trend
+const sessSeries = days.map((_,i)=>Math.round(40000 + 5000*Math.sin(i/3) + rand()*3500 + i*150));
+const cartSeries = sessSeries.map(v=>Math.round(v*0.028 + rand()*40));
+const purchSeries = cartSeries.map(c=>Math.round(c*0.32 + rand()*6));
+
+new Chart(document.getElementById('ga4Trend'),{
+  data:{labels:days,datasets:[
+    {type:'line',label:'PDP sessions',data:sessSeries,borderColor:'#f9ab00',backgroundColor:'rgba(249,171,0,0.1)',fill:true,tension:0.3,borderWidth:2,pointRadius:0,pointHoverRadius:4,yAxisID:'y'},
+    {type:'line',label:'Add to cart',data:cartSeries,borderColor:'#e8710a',tension:0.3,borderWidth:2,pointRadius:0,pointHoverRadius:4,borderDash:[3,3],yAxisID:'y1'},
+    {type:'line',label:'Purchases',data:purchSeries,borderColor:'#b06000',tension:0.3,borderWidth:2,pointRadius:0,pointHoverRadius:4,borderDash:[1,3],yAxisID:'y1'}
+  ]},
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10,font:{size:10}}},tooltip:{backgroundColor:'#202124'}},
+    scales:{
+      x:{grid:{display:false},ticks:{maxTicksLimit:8,font:{size:9}}},
+      y:{position:'left',grid:{color:'#f1f3f4'},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v,font:{size:10}}},
+      y1:{position:'right',grid:{display:false},ticks:{callback:v=>v.toLocaleString(),font:{size:10}}}
+    }
+  }
+});
+
+/* ============================================================
+   CTR benchmark chart
+   ============================================================ */
+const positions = [1,2,3,4,5,6,7,8,9,10,12,15,20,25,30];
+const expectedCTR = positions.map(p=>+(0.31*Math.exp(-0.19*p)*100).toFixed(2));
+const actualCTR = positions.map((p,i)=>+(expectedCTR[i]*range(0.4,0.75)).toFixed(2));
+
+new Chart(document.getElementById('ctrBench'),{
+  type:'line',
+  data:{
+    labels:positions.map(p=>'#'+p),
+    datasets:[
+      {label:'Expected CTR (benchmark)',data:expectedCTR,borderColor:'#9aa0a6',backgroundColor:'rgba(154,160,166,0.15)',fill:true,tension:0.3,borderWidth:2,pointRadius:3,pointHoverRadius:5},
+      {label:'JEGS actual CTR (top 500)',data:actualCTR,borderColor:'#e8710a',backgroundColor:'transparent',tension:0.3,borderWidth:2,pointRadius:3,pointHoverRadius:5,borderDash:[4,3]}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10,font:{size:11}}},tooltip:{backgroundColor:'#202124',callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},
+    scales:{
+      x:{title:{display:true,text:'Average position on Google',color:'#5f6368'},grid:{display:false}},
+      y:{title:{display:true,text:'CTR (%)',color:'#5f6368'},grid:{color:'#f1f3f4'},ticks:{callback:v=>v+'%'}}
+    }
+  }
+});
+
+/* ============================================================
+   Lift by gap type
+   ============================================================ */
+new Chart(document.getElementById('liftBar'),{
+  type:'bar',
+  data:{
+    labels:['Thin\ndescription','Missing\nfitment','Poor / no\nimages','Missing\nspecs','No reviews\nQ&A','Other'],
+    datasets:[{data:[995,780,560,445,295,135],backgroundColor:['#1a73e8','#e8710a','#12b5cb','#f9ab00','#7627bb','#9aa0a6'],borderRadius:3}]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y+'k / yr'}}},
+    scales:{
+      x:{grid:{display:false},ticks:{autoSkip:false,font:{size:10}}},
+      y:{grid:{color:'#f1f3f4'},ticks:{callback:v=>'$'+v+'k'}}
+    }
+  }
+});
+
+/* ============================================================
+   Full funnel (GSC + GA4)
+   ============================================================ */
+new Chart(document.getElementById('funnelChart'),{
+  type:'bar',
+  data:{
+    labels:['Impression\n(GSC)','Click\n(GSC)','PDP session\n(GA4)','Add to cart\n(GA4)','Checkout\n(GA4)','Purchase\n(GA4)'],
+    datasets:[
+      {label:'Catalog avg.',data:[100,3.4,2.9,0.21,0.12,0.082],backgroundColor:'#9aa0a6',borderRadius:3,barPercentage:0.6},
+      {label:'Top 500 (under-enriched)',data:[100,2.0,1.7,0.049,0.026,0.015],backgroundColor:ctx=>ctx.dataIndex<2?'#34a853':'#f9ab00',borderRadius:3,barPercentage:0.6}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{autoSkip:false,font:{size:10}}},
+      y:{type:'logarithmic',grid:{color:'#f1f3f4'},ticks:{callback:v=>v+'%'},title:{display:true,text:'% of impressions (log scale)',color:'#5f6368'}}
+    }
+  }
+});
+</script>
+
+</body>
+</html>
